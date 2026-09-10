@@ -1,11 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StoLink</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/login.css" />
+    <link rel="stylesheet" href="../css/signup.css" />
+  </head>
+  <body>
+    <div class="login-page">
+      <img
+        class="stolink-logo"
+        src="../assets/logo/black_logo.svg"
+        alt="StoLink"
+      />
+
+      <section class="login-card">
+        <h1 class="login-title">회원가입</h1>
+
+        <button type="button" class="btn-google">
+          <img src="../assets/logo/google_logo.svg" alt="" />
+          <p>Google로 시작하기</p>
+        </button>
+
+        <div class="divider">
+          <span></span>
+          <p>or</p>
+          <span></span>
+        </div>
+
+        <form id="signup-form" class="login-form">
+          <input
+            type="email"
+            name="email"
+            placeholder="이메일"
+            autocomplete="email"
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="비밀번호"
+            autocomplete="new-password"
+            minlength="6"
+            required
+          />
+          <input
+            type="password"
+            name="password-check"
+            placeholder="비밀번호 확인"
+            autocomplete="new-password"
+            required
+          />
+
+          <p id="signup-error" class="error-msg"></p>
+
+          <button type="submit" class="btn-login">회원가입</button>
+        </form>
+
+        <a class="signup-link" href="./login.html"
+          >이미 계정이 있으신가요? <span>로그인</span></a
+        >
+      </section>
+    </div>
+
+    <script type="module" src="../js/pages/signup.js"></script>
+  </body>
 </html>
