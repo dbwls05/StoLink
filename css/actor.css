@@ -1,0 +1,175 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    color: #222;
+    background-color: white;
+}
+
+
+/* 헤더 */
+header {
+    width: 80%;
+    max-width: 1000px;
+    margin: 25px auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+
+/* 검색창 */
+.search-box {
+    display: flex;
+    gap: 6px;
+}
+
+.search-box input {
+    width: 280px;
+    height: 32px;
+
+    border: none;
+    border-radius: 16px;
+
+    background-color: #ddd;
+    padding: 0 15px;
+}
+
+.search-box button {
+    width: 50px;
+    height: 32px;
+
+    border: none;
+    border-radius: 5px;
+
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+
+/* 회원 메뉴 */
+.user-menu {
+    display: flex;
+    gap: 20px;
+}
+
+.user-menu a {
+    text-decoration: none;
+    color: #222;
+    font-size: 12px;
+}
+
+
+/* 전체 */
+main {
+    width: 70%;
+    max-width: 1000px;
+    margin: 50px auto;
+}
+
+
+/* 배우 정보 */
+.actor-info {
+    display: flex;
+    align-items: center;
+
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.actor-image {
+    width: 150px;
+    height: 180px;
+
+    background-color: #ddd;
+    border-radius: 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+}
+
+.actor-detail h1 {
+    font-size: 22px;
+    margin-bottom: 12px;
+}
+
+.actor-detail p {
+    font-size: 13px;
+}
+
+
+/* 구분선 */
+.filmography {
+    border-top: 1px solid #aaa;
+    padding-top: 15px;
+}
+
+.filmography h2 {
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+
+/* 필모그래피 */
+.film-list {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    overflow: hidden;
+}
+
+.work-card {
+    width: 90px;
+    flex-shrink: 0;
+
+    text-decoration: none;
+    color: #222;
+}
+
+.work-poster {
+    width: 90px;
+    height: 120px;
+
+    background-color: #ddd;
+    border-radius: 4px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 10px;
+
+    margin-bottom: 5px;
+}
+
+.work-card p {
+    font-size: 10px;
+}
+
+
+/* 더보기 */
+.more-card {
+    width: 60px;
+    height: 120px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-decoration: none;
+    color: #222;
+    font-size: 11px;
+}

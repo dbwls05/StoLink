@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배우 상세페이지</title>
+    <link rel="stylesheet" href="../css/actor.css">
+</head>
+
+<body>
+
+    <!-- 헤더 -->
+    <header>
+        <div class="logo">
+            사이트 이름
+        </div>
+
+        <form class="search-box" action="search.html" method="GET">
+            <input type="text" name="query" placeholder="검색어 입력">
+            <button type="submit">검색</button>
+        </form>
+
+        <div class="user-menu">
+            <a href="#">회원가입</a>
+            <a href="#">로그인</a>
+        </div>
+    </header>
+
+
+    <!-- 배우 기본 정보 -->
+    <main>
+
+        <section class="actor-info">
+
+            <div class="actor-image">
+                배우 사진
+            </div>
+
+            <div class="actor-detail">
+                <h1>배우이름</h1>
+                <p>출생: 2000.01.01</p>
+            </div>
+
+        </section>
+
+
+        <!-- 필모그래피 -->
+        <section class="filmography">
+
+            <h2>필모그래피</h2>
+
+            <div class="film-list">
+
+                <a href="work.html?id=1" class="work-card">
+                    <div class="work-poster">
+                        사진
+                    </div>
+                    <p>작품이름</p>
+                </a>
+
+                <a href="work.html?id=2" class="work-card">
+                    <div class="work-poster">
+                        사진
+                    </div>
+                    <p>작품이름</p>
+                </a>
+
+                <a href="work.html?id=3" class="work-card">
+                    <div class="work-poster">
+                        사진
+                    </div>
+                    <p>작품이름</p>
+                </a>
+
+                <a href="work.html?id=4" class="work-card">
+                    <div class="work-poster">
+                        사진
+                    </div>
+                    <p>작품이름</p>
+                </a>
+
+                <a href="work.html?id=5" class="work-card">
+                    <div class="work-poster">
+                        사진
+                    </div>
+                    <p>작품이름</p>
+                </a>
+
+                <a href="actor-works.html?id=6" class="more-card">
+                    <span>더보기 >;</span>
+                </a>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
