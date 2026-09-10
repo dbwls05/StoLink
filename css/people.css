@@ -1,0 +1,196 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    color: #222;
+    background-color: white;
+}
+
+
+/* =========================
+   헤더
+========================= */
+
+header {
+    width: 70%;
+    max-width: 1000px;
+
+    margin: 25px auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* 로고 */
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+
+    text-decoration: none;
+    color: #222;
+}
+
+
+/* 검색창 */
+
+.search-box {
+    display: flex;
+    gap: 6px;
+}
+
+.search-box input {
+    width: 300px;
+    height: 32px;
+
+    border: none;
+    border-radius: 16px;
+
+    background-color: #ddd;
+
+    padding: 0 15px;
+}
+
+.search-box button {
+    width: 50px;
+    height: 32px;
+
+    border: none;
+    border-radius: 5px;
+
+    background-color: #ddd;
+
+    cursor: pointer;
+}
+
+
+/* 회원 메뉴 */
+
+.user-menu {
+    display: flex;
+    gap: 20px;
+}
+
+.user-menu a {
+    text-decoration: none;
+    color: #222;
+
+    font-size: 12px;
+}
+
+
+/* =========================
+   메인
+========================= */
+
+main {
+    width: 70%;
+    max-width: 1000px;
+
+    margin: 60px auto 100px;
+}
+
+
+/* 제목 */
+
+.title-section {
+    margin-bottom: 50px;
+}
+
+.title-section h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.title-section p {
+    font-size: 14px;
+    color: #777;
+}
+
+
+/* =========================
+   배우 / 제작진
+========================= */
+
+.people-section {
+    border-top: 1px solid #aaa;
+
+    padding-top: 20px;
+
+    margin-bottom: 60px;
+}
+
+.people-section h2 {
+    font-size: 20px;
+    margin-bottom: 25px;
+}
+
+
+/* 카드 그리드 */
+
+.people-grid {
+    display: grid;
+
+    grid-template-columns: repeat(5, 1fr);
+
+    gap: 30px 20px;
+}
+
+
+/* 사람 카드 */
+
+.person-card {
+    text-decoration: none;
+    color: #222;
+
+    display: block;
+}
+
+
+/* 사진 */
+
+.person-image {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+
+    background-color: #ddd;
+
+    border-radius: 6px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+
+    margin-bottom: 10px;
+}
+
+
+/* 이름 */
+
+.person-card h3 {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+
+/* 배역 / 직업 */
+
+.person-card p {
+    font-size: 11px;
+    color: #777;
+}
+
+
+/* 마우스를 올렸을 때 */
+
+.person-card:hover .person-image {
+    opacity: 0.8;
+}

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StoLink</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <link rel="stylesheet" href="../css/login.css" />
+  </head>
+  <body>
+    <div class="login-page">
+      <img
+        class="stolink-logo"
+        src="../assets/logo/black_logo.svg"
+        alt="StoLink"
+      />
+
+      <section class="login-card">
+        <h1 class="login-title">로그인</h1>
+
+        <button type="button" class="btn-google">
+          <img src="../assets/logo/google_logo.svg" alt="" />
+          <p>Google로 로그인하기</p>
+        </button>
+
+        <div class="divider">
+          <span></span>
+          <p>or</p>
+          <span></span>
+        </div>
+
+        <form id="login-form" class="login-form">
+          <input
+            type="email"
+            name="email"
+            placeholder="이메일"
+            autocomplete="email"
+            required
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="비밀번호"
+            autocomplete="current-password"
+            required
+          />
+
+          <p id="login-error" class="error-msg"></p>
+
+          <button type="submit" class="btn-login">로그인</button>
+        </form>
+
+        <a class="forgot-link" href="#">비밀번호를 잊으셨나요?</a>
+        <a class="signup-link" href="./signup.html"><span>회원가입</span></a>
+      </section>
+    </div>
+
+    <script type="module" src="../js/pages/login.js"></script>
+  </body>
+</html>
