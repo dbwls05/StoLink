@@ -1,0 +1,142 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: white;
+    color: #222;
+}
+
+
+/* 헤더 */
+header {
+    width: 80%;
+    max-width: 1000px;
+    margin: 30px auto 0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.user-menu {
+    display: flex;
+    gap: 20px;
+}
+
+.user-menu a {
+    text-decoration: none;
+    color: #222;
+    font-size: 14px;
+}
+
+
+/* 메인 */
+main {
+    width: 80%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+
+/* 검색 영역 */
+.search-section {
+    text-align: center;
+    margin-top: 100px;
+}
+
+.search-section h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.search-box {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.search-box input {
+    width: 400px;
+    height: 40px;
+
+    border: none;
+    border-radius: 4px 0 0 4px;
+
+    background-color: #eee;
+    padding: 0 20px;
+}
+
+.search-box button {
+    width: 70px;
+    height: 40px;
+
+    border: none;
+    border-radius: 4px 0 0 4px;
+
+    background-color: #ddd;
+    cursor: pointer;
+}
+
+
+/* 추천 콘텐츠 */
+.recommend-section {
+    margin-top: 150px;
+}
+
+.recommend-section h2 {
+    font-size: 20px;
+    margin-bottom: 15px;
+}
+
+.recommend-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.content-list {
+    display: flex;
+    gap: 20px;
+}
+
+.content-card {
+    width: 150px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.poster {
+    width: 150px;
+    height: 200px;
+
+    background-color: #ddd;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.content-card h3 {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.content-card p {
+    font-size: 11px;
+    color: #777;
+}
+.content-box {
+    width: 100%;
+    height: 300px;
+    margin-top: 50px;
+
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f8f8f8;
+}
