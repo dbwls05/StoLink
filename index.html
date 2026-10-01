@@ -4,57 +4,51 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StoLink</title>
-    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/login.css" />
+    <link rel="stylesheet" href="./css/login.css" />
   </head>
-
   <body>
-    <header>
-      <div class="logo">StoLink</div>
+    <div class="login-page">
+      <img
+        class="stolink-logo"
+        src="../assets/logo/black_logo.svg"
+        alt="StoLink"
+      />
 
-      <div class="user-menu">
-        <a href="pages/signup.html">회원가입</a>
-        <a href="pages/login.html">로그인</a>
-      </div>
-    </header>
+      <section class="login-card">
+        <h1 class="login-title">Login</h1>
 
-    <main>
-      <!-- 검색 영역 -->
-      <section class="search-section">
-        <h1>콘텐츠 탐험을 시작하세요</h1>
+        <button type="button" class="btn-google">
+          <img src="../assets/logo/google_logo.svg" alt="" />
+          <p>Google로 로그인하기</p>
+        </button>
 
-        <div class="search-box">
-          <form action="search.html" method="get">
-            <input type="text" name="query" placeholder="검색어 입력" />
-            <button type="submit">검색</button>
-          </form>
+        <div class="divider">
+          <span></span>
+          <p>or</p>
+          <span></span>
         </div>
+
+        <form class="login-form">
+          <input
+            type="text"
+            name="username"
+            placeholder="아이디"
+            autocomplete="username"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="비밀번호"
+            autocomplete="current-password"
+          />
+
+          <button type="submit" class="btn-login">로그인</button>
+        </form>
+
+        <a class="forgot-link" href="#">비밀번호를 잊으셨나요?</a>
+        <a class="signup-link" href="/pages/signup.html">회원가입</a>
       </section>
-
-      <!-- 추천 콘텐츠 -->
-
-      <section class="recommend-section">
-        <h2>추천콘텐츠</h2>
-        <div class="content-list">
-          <a href="library.html?id=1" class="content-card">
-            <div class="poster"></div>
-            <h3>콘텐츠 제목</h3>
-            <p>영화 · 액션</p>
-          </a>
-
-          <a href="library.html?id=2" class="content-card">
-            <div class="poster"></div>
-            <h3>콘텐츠 제목</h3>
-            <p>드라마 · 로맨스</p>
-          </a>
-
-          <a href="library.html?id=3" class="content-card">
-            <div class="poster"></div>
-            <h3>콘텐츠 제목</h3>
-            <p>웹툰 · 판타지</p>
-          </a>
-        </div>
-      </section>
-    </main>
-    <div class="content-box"></div>
+    </div>
   </body>
 </html>

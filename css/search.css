@@ -44,12 +44,10 @@
     border-radius: 2cm;
     width: 80px;
     height: 35px;
-    
 }
 
 .search-button:hover {
     background-color: #e8e8e8;
-    
 }
 
 .login-signup {
@@ -92,3 +90,39 @@
 .filter .button-ative {
     border-color: #333;
 }
+
+.poster {
+    width: 150px;
+    height: 200px;
+
+    background-color: #ddd;
+    border-radius: 5px;
+    margin-bottom: 8px;
+}
+
+.content-card h3 {
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.content-card p {
+    font-size: 11px;
+    color: #777;
+}
+
+.content-box {
+    width: 100%;
+    height: 300px;
+    margin-top: 50px;
+
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f8f8f8;
+}
+
+.content-card {
+    width: 150px;
+    text-decoration: none;
+    color: inherit;
+}
+
