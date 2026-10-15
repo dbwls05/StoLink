@@ -1,0 +1,194 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: #fffcf7;
+    font-family: "Pretendard", "Noto Sans KR", sans-serif;
+    color: #000;
+}
+
+/* ===== 헤더 ===== */
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 90px;
+    height: 80px;
+    background-color: #432d30;
+}
+
+#logo {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 400;
+    color: #fff;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    width: 480px;
+    height: 44px;
+    padding: 0 8px 0 16px;
+    background-color: #fff;
+    border-radius: 22px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.search-bar input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0 8px 0 28px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23666' stroke-width='1.5' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='M11 11l4 4'/%3E%3C/svg%3E") no-repeat left center;
+}
+
+.search-bar button {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 14px;
+    background-color: #f0f0f0;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.login-signup {
+    display: flex;
+    gap: 20px;
+    white-space: nowrap;
+}
+
+.login-signup a {
+    display: inline-block;
+    border-radius: 999px;   
+    color: #ffffff;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.mypage {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 56px 24px 100px;
+}
+
+/* ===== 프로필 ===== */
+.profile {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+}
+
+.profile-image {
+    flex-shrink: 0;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background-color: #d9d9d9;
+}
+
+.profile-info {
+    padding-top: 10px;
+}
+
+.nickname {
+    margin: 0 0 10px;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.email {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.profile-button {
+    display: flex;
+    gap: 14px;
+    margin-left: 100px;
+    /* 오른쪽 끝으로 */
+    padding-top: 20px;
+    /* 높이는 이 숫자로 조절 */
+}
+
+.profile-button button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 999px;
+    /* 둥글게 */
+    font-size: 13px;
+    color: #5a0a2a;
+    cursor: pointer;
+}
+
+.edit-button {
+    background-color: #ffc9d6;
+}
+
+.logout-button {
+    background-color: #d9d9d9;
+}
+
+/* ===== 통계 카드 ===== */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-top: 64px;
+}
+
+.stat-card {
+    padding: 24px 28px;
+    background-color: #d9d9d9;
+    /* 회색은 카드에만! */
+}
+
+.stat-number {
+    margin: 0 0 14px;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.stat-label {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+/* ===== 최근 저장한 콘텐츠 ===== */
+.recent {
+    margin-top: 100px;
+}
+
+.recent-title {
+    margin: 0 0 20px;
+    font-size: 26px;
+    font-weight: 400;
+}
+
+.recent-list {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 24px;
+}
+
+.recent-card img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 99 / 136;
+    /* 포스터 비율 유지 */
+    object-fit: cover;
+    border-radius: 4px;
+    background-color: #d9d9d9;
+}
+
+.recent-name {
+    margin: 8px 0 0;
+    font-size: 12px;
+}
