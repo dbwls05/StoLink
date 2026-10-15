@@ -4,50 +4,46 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StoLink</title>
-    <link rel="stylesheet" href="./css/login.css"/>
+    <link rel="stylesheet" href="./css/home.css" />
   </head>
   <body>
-    <div class="login-page">
-      <img
-        class="stolink-logo"
-        src="../assets/logo/black_logo.svg"
-        alt="StoLink"
-      />
+    <header class="site-header">
+      <a href="/index.html" class="logo">StoLink</a>
+      <nav class="user-menu">
+        <a href="/pages/login.html" class="login-link">로그인</a>
+        <a href="/pages/signup.html" class="signup-btn">회원가입</a>
+      </nav>
+    </header>
 
-      <section class="login-card">
-        <h1 class="login-title">Login</h1>
+    <section class="hero">
+      <h1>StoLink에서 콘텐츠 탐험을 시작하세요</h1>
+      <form class="search-bar" action="/pages/search.html">
+        <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linecap="round">
+          <circle cx="11" cy="11" r="8" />
+          <path d="M17 17l5 5" />
+        </svg>
+        <input type="text" name="q" placeholder="작품명, 배우, 감독을 검색해보세요" />
+        <button type="submit">검색</button>
+      </form>
+    </section>
 
-        <button type="button" class="btn-google">
-          <img src="../assets/logo/google_logo.svg" alt="" />
-          <p>Google로 로그인하기</p>
-        </button>
-
-        <div class="divider">
-          <span></span>
-          <p>or</p>
-          <span></span>
-        </div>
-
-        <form class="login-form">
-          <input
-            type="text"
-            name="username"
-            placeholder="아이디"
-            autocomplete="username"
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="비밀번호"
-            autocomplete="current-password"
-          />
-
-          <button type="submit" class="btn-login">로그인</button>
-        </form>
-
-        <a class="forgot-link" href="#">비밀번호를 잊으셨나요?</a>
-        <a class="signup-link" href="/pages/signup.html">회원가입</a>
+    <main class="home">
+      <section class="section">
+        <h2>실시간 인기</h2>
+        <ul class="card-row ranking" id="ranking-list"></ul>
       </section>
-    </div>
+
+      <section class="section">
+        <h2>인기 영화</h2>
+        <ul class="card-row" id="movie-list"></ul>
+      </section>
+
+      <section class="section">
+        <h2>인기 드라마</h2>
+        <ul class="card-row" id="drama-list"></ul>
+      </section>
+    </main>
+
+    <script src="./js/pages/home.js"></script>
   </body>
 </html>
