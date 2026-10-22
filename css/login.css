@@ -1,3 +1,6 @@
+body {
+  background-color: #13172c;
+}
 .login-page {
   display: flex;
   flex-direction: column;
@@ -19,7 +22,7 @@
 
   border-radius: 30px;
   border: 1px solid #000;
-  background: #fff8f9;
+  background: #f6edff;
   box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
@@ -99,7 +102,7 @@
   width: 100%;
   height: 52px;
   margin-top: 8px;
-  background: #f2b8c6;
+  background: #d0bcff;
   border: 1px solid #e8a2b4;
   border-radius: 26px;
   font-size: 16px;
@@ -126,5 +129,5 @@
 }
 
 .signup-link span {
-  color: #ec4899;
+  color: #d0bcff;
 }

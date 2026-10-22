@@ -10,16 +10,14 @@
   </head>
   <body>
     <div class="login-page">
-      <img
-        class="stolink-logo"
-        src="../assets/logo/black_logo.svg"
-        alt="StoLink"
-      />
+      <a href="../index.html"
+        ><img class="stolink-logo" src="../assets/logo/logo.svg" alt="StoLink"
+      /></a>
 
       <section class="login-card">
         <h1 class="login-title">회원가입</h1>
 
-        <button type="button" class="btn-google">
+        <button type="button" class="btn-google" onclick="googleLogin()">
           <img src="../assets/logo/google_logo.svg" alt="" />
           <p>Google로 시작하기</p>
         </button>
@@ -59,6 +57,7 @@
           <button type="submit" class="btn-login">회원가입</button>
         </form>
 
+        <a class="forgot-link" href="#"></a>
         <a class="signup-link" href="./login.html"
           >이미 계정이 있으신가요? <span>로그인</span></a
         >
@@ -66,5 +65,6 @@
     </div>
 
     <script type="module" src="../js/pages/signup.js"></script>
+    <script type="module" src="../js/supabase/auth.js"></script>
   </body>
 </html>
