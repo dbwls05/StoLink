@@ -42,16 +42,20 @@
             autocomplete="current-password"
             required
           />
+          <a class="forgot-link" href="#">비밀번호를 잊으셨나요?</a>
 
           <p id="login-error" class="error-msg"></p>
-
-          <button type="submit" class="btn-login">로그인</button>
         </form>
 
-        <a class="forgot-link" href="#">비밀번호를 잊으셨나요?</a>
-        <a class="signup-link" href="./signup.html"
-          >아직 계정이 없다면? <span>회원가입</span></a
-        >
+        <div class="login-bottom">
+          <button type="submit" class="btn-login" form="login-form">
+            로그인
+          </button>
+
+          <a class="signup-link" href="./signup.html">
+            아직 계정이 없다면? <span>회원가입</span>
+          </a>
+        </div>
       </section>
     </div>
 
