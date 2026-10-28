@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>작가 상세페이지</title>
+
+    <link rel="stylesheet" href="../css/director.css">
+</head>
+
+<body>
+
+    <!-- 헤더 -->
+    <header>
+
+        <a href="main.html" class="logo">
+            StoLink
+        </a>
+
+        <!-- 검색 -->
+        <form class="search-box" action="search.html" method="GET">
+            <input
+                type="text"
+                name="query"
+                placeholder="검색어 입력"
+            >
+
+            <button type="submit">
+                검색
+            </button>
+        </form>
+
+        <!-- 회원 메뉴 -->
+        <div class="user-menu">
+            <a href="#">회원가입</a>
+            <a href="#">로그인</a>
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <!-- =========================
+             작가 프로필
+        ========================== -->
+
+        <section class="writer-profile">
+
+            <div class="writer-image">
+                작가 사진
+            </div>
+
+            <div class="writer-info">
+
+                <h1>작가이름</h1>
+
+                <p class="birth">
+                    2000.01.01
+                </p>
+
+                <p class="introduction">
+                    작가에 대한 간단한 소개가 들어가는 부분입니다.
+                    대표적인 활동이나 작가의 특징 등을 표시합니다.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             대표 작품
+        ========================== -->
+
+        <section class="representative-section">
+
+            <h2>대표 작품</h2>
+
+            <div class="representative-list">
+
+                <a href="webtoon.html?id=1" class="representative-card">
+
+                    <div class="representative-image">
+                        포스터
+                    </div>
+
+                    <h3>대표 작품 1</h3>
+
+                    <p>
+                        판타지 · 네이버웹툰
+                    </p>
+
+                </a>
+
+
+                <a href="webtoon.html?id=2" class="representative-card">
+
+                    <div class="representative-image">
+                        포스터
+                    </div>
+
+                    <h3>대표 작품 2</h3>
+
+                    <p>
+                        액션 · 카카오웹툰
+                    </p>
+
+                </a>
+
+
+                <a href="webtoon.html?id=3" class="representative-card">
+
+                    <div class="representative-image">
+                        포스터
+                    </div>
+
+                    <h3>대표 작품 3</h3>
+
+                    <p>
+                        로맨스 · 네이버웹툰
+                    </p>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             전체 작품 목록
+        ========================== -->
+
+        <section class="works-section">
+
+            <h2>작품 목록</h2>
+
+            <div class="works-list">
+
+
+                <!-- 작품 1 -->
+                <article class="work-item">
+
+                    <a href="webtoon.html?id=1" class="work-main">
+
+                        <div class="work-poster">
+                            포스터
+                        </div>
+
+                        <div class="work-info">
+
+                            <h3>웹툰 작품 제목</h3>
+
+                            <p>
+                                장르: 액션 · 판타지
+                            </p>
+
+                            <p>
+                                연재 플랫폼: 네이버웹툰
+                            </p>
+
+                        </div>
+
+                    </a>
+
+
+                    <!-- 실사화 정보 -->
+                    <div class="adaptation">
+
+                        <h4>실사화</h4>
+
+                        <a href="work.html?id=101">
+                            <span class="adaptation-type">드라마</span>
+                            <span>실사화 작품 제목</span>
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- 작품 2 -->
+                <article class="work-item">
+
+                    <a href="webtoon.html?id=2" class="work-main">
+
+                        <div class="work-poster">
+                            포스터
+                        </div>
+
+                        <div class="work-info">
+
+                            <h3>웹툰 작품 제목</h3>
+
+                            <p>
+                                장르: 로맨스 · 드라마
+                            </p>
+
+                            <p>
+                                연재 플랫폼: 카카오웹툰
+                            </p>
+
+                        </div>
+
+                    </a>
+
+
+                    <div class="adaptation">
+
+                        <h4>실사화</h4>
+
+                        <a href="work.html?id=102">
+                            <span class="adaptation-type">영화</span>
+                            <span>실사화 작품 제목</span>
+                        </a>
+
+                        <a href="work.html?id=103">
+                            <span class="adaptation-type">드라마</span>
+                            <span>실사화 작품 제목</span>
+                        </a>
+
+                    </div>
+
+                </article>
+
+
+                <!-- 작품 3 -->
+                <article class="work-item">
+
+                    <a href="webtoon.html?id=3" class="work-main">
+
+                        <div class="work-poster">
+                            포스터
+                        </div>
+
+                        <div class="work-info">
+
+                            <h3>웹툰 작품 제목</h3>
+
+                            <p>
+                                장르: 스릴러
+                            </p>
+
+                            <p>
+                                연재 플랫폼: 레진코믹스
+                            </p>
+
+                        </div>
+
+                    </a>
+
+
+                    <div class="adaptation no-adaptation">
+
+                        <h4>실사화</h4>
+
+                        <p>
+                            실사화 작품 없음
+                        </p>
+
+                    </div>
+
+                </article>
+
+
+                <!-- 작품 4 -->
+                <article class="work-item">
+
+                    <a href="webtoon.html?id=4" class="work-main">
+
+                        <div class="work-poster">
+                            포스터
+                        </div>
+
+                        <div class="work-info">
+
+                            <h3>웹툰 작품 제목</h3>
+
+                            <p>
+                                장르: 판타지
+                            </p>
+
+                            <p>
+                                연재 플랫폼: 네이버웹툰
+                            </p>
+
+                        </div>
+
+                    </a>
+
+
+                    <div class="adaptation">
+
+                        <h4>실사화</h4>
+
+                        <a href="work.html?id=104">
+                            <span class="adaptation-type">드라마</span>
+                            <span>실사화 작품 제목</span>
+                        </a>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
