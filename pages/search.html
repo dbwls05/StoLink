@@ -1,45 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="../css/search.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StoLink - 검색 결과</title>
+  <link rel="stylesheet" href="../css/search.css" />
 </head>
 
 <body>
-    <header class="site-header">
-        <h3 id="logo">사이트 이름</h3>
+  <header class="site-header">
+    <a href="../index.html" class="logo">StoLink</a>
+    <form class="search-bar" action="search.html">
+      <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569"
+        stroke-width="1.6" stroke-linecap="round">
+        <circle cx="11" cy="11" r="8" />
+        <path d="M17 17l5 5" />
+      </svg>
+      <input type="text" name="q" placeholder="검색어" />
+    </form>
+    <nav class="user-menu">
+      <a href="login.html" class="login-link">로그인</a>
+      <a href="signup.html" class="signup-btn">회원가입</a>
+    </nav>
+  </header>
 
-        <form class="search-bar">
-            <input type="text">
-        </form>
+  <h1 class="result-title">‘<span id="keyword">검색어</span>’ 검색결과 <span id="total">00</span>건</h1>
 
-        <button type="submit" class="search-button">검색</button>
+  <nav class="filter">
+    <button type="button" class="chip active">전체 <span>00</span></button>
+    <button type="button" class="chip">영화 <span>00</span></button>
+    <button type="button" class="chip">드라마·TV <span>00</span></button>
+    <button type="button" class="chip">웹툰 <span>00</span></button>
+    <button type="button" class="chip sort">정렬 <i class="caret"></i></button>
+  </nav>
 
-        <div class="login-signup">
-            <a href="signup.html">회원가입</a>
-            <a href="login.html">로그인</a>
-        </div>
+  <ul class="result-list" id="result-list"></ul>
 
-        <nav class="filter">
-            <button class="button-ative">전체</button>
-            <button class="sort-button">영화</button>
-            <button class="sort-button">드라마·TV</button>
-            <button class="sort-button">웹툰</button>
-            <button class="sort-button">장르</button>
-        </nav>
-    </header>
+  <main class="search-result">
+    <a href="library.html?id=1" class="content-card">
+      <div class="poster"></div>
+      <h3>콘텐츠 제목</h3>
+      <p>영화 · 액션</p>
+    </a>
+  </main>
 
-    <main class="search-result">
-        <a href="library.html?id=1" class="content-card">
-            <div class="poster"></div>
-            <h3>콘텐츠 제목</h3>
-            <p>영화 · 액션</p>
-        </a>
-    </main>
-
-    <script type="module" src="../js/pages/search.js"></script>
-  </body>
-</html>
+  <script type="module" src="../js/pages/search.js"></script>
+</body>

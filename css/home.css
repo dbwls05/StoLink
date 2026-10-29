@@ -1,0 +1,220 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: #f1efff;
+  color: #0f172a;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+/* 헤더 + 히어로 */
+.site-header {
+  background: #0f172a;
+  height: 100px;
+  padding: 0 100px 0 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  background: linear-gradient(90deg, #a855f7, #6d4ef5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.login-link {
+  color: #fff;
+  font-size: 18px;
+}
+
+.signup-btn {
+  background: #4f46e5;
+  color: #fff;
+  font-size: 18px;
+  padding: 12px 24px;
+  border-radius: 999px;
+}
+
+.hero {
+  background:
+    radial-gradient(ellipse 520px 200px at 50% 45%, rgba(109, 78, 245, 0.45), transparent 70%),
+    #0f172a;
+  height: 365px;
+  padding-top: 108px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 40px;
+  font-weight: 400;
+  color: #e2dcff;
+  margin-bottom: 52px;
+}
+
+.search-bar {
+  width: 781px;
+  max-width: 90%;
+  height: 60px;
+  margin: 0 auto;
+  background: linear-gradient(90deg, #fdfdfd 0%, #c9c1f7 50%, #fdfdfd 100%);
+  border-radius: 30px;
+  padding: 0 14px 0 22px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 0 60px rgba(109, 78, 245, 0.5);
+}
+
+.search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.search-bar input::placeholder {
+  color: #64748b;
+}
+
+.search-bar button {
+  background: #4f46e5;
+  color: #fff;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 999px;
+}
+
+/* 콘텐츠 섹션 */
+.home {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 80px 100px 120px;
+}
+
+.section {
+  margin-bottom: 70px;
+}
+
+.section h2 {
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 32px;
+}
+
+.card-row {
+  display: flex;
+  gap: 55px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.card-row > .card-item {
+  flex: 0 0 220px;
+}
+
+.card-item {
+  position: relative;
+}
+
+.card {
+  display: block;
+  background: #fff;
+}
+
+.poster {
+  position: relative;
+  aspect-ratio: 220 / 331;
+  background: #d9d9d9;
+}
+
+.bookmark {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: #1e1b4b;
+  color: #c7c2ff;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.card-info {
+  padding: 12px 10px 14px;
+}
+
+.meta {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.card-info h3 {
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* 실시간 인기 순위 숫자 */
+.ranking {
+  gap: 20px;
+}
+
+.ranking > .card-item {
+  flex-basis: 272px;
+  padding-left: 52px;
+}
+
+.rank-num {
+  position: absolute;
+  left: 0;
+  top: -6px;
+  font-family: "Georgia", "Times New Roman", serif;
+  font-style: italic;
+  font-size: 80px;
+  line-height: 1;
+  color: #0f172a;
+}

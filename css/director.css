@@ -1,0 +1,371 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    color: #222;
+    background-color: white;
+}
+
+
+/* =========================
+   헤더
+========================= */
+
+header {
+    width: 70%;
+    max-width: 1000px;
+
+    margin: 25px auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+/* 로고 */
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+
+    text-decoration: none;
+    color: #222;
+}
+
+
+/* 검색창 */
+
+.search-box {
+    display: flex;
+    gap: 6px;
+}
+
+.search-box input {
+    width: 300px;
+    height: 32px;
+
+    border: none;
+    border-radius: 16px;
+
+    background-color: #ddd;
+
+    padding: 0 15px;
+}
+
+.search-box button {
+    width: 50px;
+    height: 32px;
+
+    border: none;
+    border-radius: 5px;
+
+    background-color: #ddd;
+
+    cursor: pointer;
+}
+
+
+/* 회원 메뉴 */
+
+.user-menu {
+    display: flex;
+    gap: 20px;
+}
+
+.user-menu a {
+    font-size: 12px;
+
+    text-decoration: none;
+    color: #222;
+}
+
+
+/* =========================
+   메인
+========================= */
+
+main {
+    width: 70%;
+    max-width: 1000px;
+
+    margin: 60px auto 100px;
+}
+
+
+/* =========================
+   작가 프로필
+========================= */
+
+.writer-profile {
+    display: flex;
+    align-items: center;
+
+    gap: 30px;
+
+    margin-bottom: 40px;
+}
+
+
+/* 작가 사진 */
+
+.writer-image {
+    width: 160px;
+    height: 200px;
+
+    background-color: #ddd;
+
+    border-radius: 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 12px;
+
+    flex-shrink: 0;
+}
+
+
+/* 작가 정보 */
+
+.writer-info h1 {
+    font-size: 24px;
+
+    margin-bottom: 10px;
+}
+
+.birth {
+    font-size: 13px;
+
+    color: #777;
+
+    margin-bottom: 20px;
+}
+
+.introduction {
+    width: 500px;
+
+    font-size: 13px;
+
+    line-height: 1.6;
+}
+
+
+/* =========================
+   대표 작품
+========================= */
+
+.representative-section {
+    border-top: 1px solid #aaa;
+
+    padding-top: 20px;
+
+    margin-bottom: 50px;
+}
+
+.representative-section h2 {
+    font-size: 18px;
+
+    margin-bottom: 20px;
+}
+
+
+.representative-list {
+    display: flex;
+
+    gap: 20px;
+}
+
+
+/* 대표 작품 카드 */
+
+.representative-card {
+    width: 130px;
+
+    text-decoration: none;
+    color: #222;
+}
+
+
+/* 대표작 이미지 */
+
+.representative-image {
+    width: 130px;
+    height: 175px;
+
+    background-color: #ddd;
+
+    border-radius: 5px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 10px;
+
+    margin-bottom: 8px;
+}
+
+.representative-card h3 {
+    font-size: 13px;
+
+    margin-bottom: 5px;
+}
+
+.representative-card p {
+    font-size: 10px;
+
+    color: #777;
+}
+
+
+/* =========================
+   전체 작품 목록
+========================= */
+
+.works-section {
+    border-top: 1px solid #aaa;
+
+    padding-top: 20px;
+}
+
+.works-section h2 {
+    font-size: 18px;
+
+    margin-bottom: 20px;
+}
+
+
+/* 작품 하나 */
+
+.work-item {
+    display: flex;
+
+    align-items: center;
+
+    gap: 30px;
+
+    padding: 20px 0;
+
+    border-bottom: 1px solid #ddd;
+}
+
+
+/* 웹툰 작품 */
+
+.work-main {
+    width: 55%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 20px;
+
+    text-decoration: none;
+
+    color: #222;
+}
+
+
+/* 작품 포스터 */
+
+.work-poster {
+    width: 100px;
+    height: 135px;
+
+    background-color: #ddd;
+
+    border-radius: 5px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 10px;
+
+    flex-shrink: 0;
+}
+
+
+/* 작품 정보 */
+
+.work-info h3 {
+    font-size: 16px;
+
+    margin-bottom: 12px;
+}
+
+.work-info p {
+    font-size: 11px;
+
+    color: #777;
+
+    margin-bottom: 7px;
+}
+
+
+/* =========================
+   실사화 정보
+========================= */
+
+.adaptation {
+    width: 35%;
+
+    padding-left: 20px;
+
+    border-left: 1px solid #ddd;
+}
+
+.adaptation h4 {
+    font-size: 13px;
+
+    margin-bottom: 10px;
+}
+
+
+/* 실사화 작품 링크 */
+
+.adaptation a {
+    display: block;
+
+    text-decoration: none;
+
+    color: #222;
+
+    font-size: 11px;
+
+    margin-bottom: 8px;
+}
+
+
+/* 영화 / 드라마 */
+
+.adaptation-type {
+    display: inline-block;
+
+    padding: 3px 6px;
+
+    margin-right: 5px;
+
+    border-radius: 4px;
+
+    background-color: #eee;
+
+    font-size: 9px;
+}
+
+
+/* 실사화 없음 */
+
+.no-adaptation p {
+    font-size: 11px;
+
+    color: #aaa;
+}

@@ -29,3 +29,19 @@ export async function getCurrentUser() {
   } = await supabase.auth.getUser();
   return user;
 }
+
+// 구글 로그인
+async function googleLogin() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: window.location.origin + "/index.html",
+    },
+  });
+
+  if (error) {
+    console.error("구글 로그인 실패:", error.message);
+    alert("로그인에 실패하였습니다. 다시 시도해주세요.");
+  }
+}
+window.googleLogin = googleLogin;

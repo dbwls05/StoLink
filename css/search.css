@@ -1,94 +1,155 @@
 * {
-    padding: 10px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
+body {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: #f2efff;
+  color: #0f172a;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+/* 헤더 */
 .site-header {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 16px 24px;
-    transform: translateX(50px);
+  background: #0f172a;
+  height: 100px;
+  padding: 0 77px 0 50px;
+  display: flex;
+  align-items: center;
 }
 
-#logo {
-    font-size: 20px;
-    margin: 0;
-    white-space: nowrap;
-    font-weight: 700;
+.logo {
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  background: linear-gradient(90deg, #a855f7, #6d4ef5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .search-bar {
-    display: flex;
-    flex: 1;
-    max-width: 500px;
-    border-radius: 50cm;
+  width: 583px;
+  height: 45px;
+  margin-left: 98px;
+  background: #fff;
+  border-radius: 23px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
 .search-bar input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px 0 0 4px;
-    outline: none;
-    border-radius: 15cm;
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
 }
 
-.search-button {
-    padding: 8px 16px;
-    border: 1px solid #ccc;
-    background-color: #f5f5f5;
-    cursor: pointer;
-    border-radius: 2cm;
-    width: 80px;
-    height: 35px;
+.search-bar input::placeholder {
+  color: #64748b;
 }
 
-.search-button:hover {
-    background-color: #e8e8e8;
+.user-menu {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 40px;
 }
 
-.login-signup {
-    display: flex;
-    gap: 12px;
-    white-space: nowrap;
-    margin-left: 50px;
+.login-link {
+  color: #fff;
+  font-size: 18px;
 }
 
-.login-signup a {
-    text-decoration: none;
-    color: #333;
-    font-size: 14px;
+.signup-btn {
+  background: #4f46e5;
+  color: #fff;
+  font-size: 18px;
+  padding: 12px 15px;
+  border-radius: 999px;
 }
 
-.login-signup a:hover {
-    text-decoration: underline;
+/* 검색 결과 */
+.search-result {
+  padding: 55px 36px 100px;
+}
+
+.result-title {
+  font-size: 32px;
+  font-weight: 400;
+  margin-bottom: 16px;
 }
 
 .filter {
-    width: 100%;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 24px;
+  margin-bottom: 59px;
 }
 
-.filter button {
-    padding: 6px 14px;
-    border: 1px solid #ccc;
-    border-radius: 20px;
-    background-color: #fff;
-    font-size: 13px;
-    cursor: pointer;
+.chip {
+  height: 46px;
+  padding: 0 20px;
+  border: 1px solid #c4b5fd;
+  border-radius: 999px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.filter button:hover {
-    background-color: #f0f0f0;
+.chip span {
+  font-size: 16px;
 }
 
-.filter .button-ative {
-    border-color: #333;
+.chip.active {
+  background: #d4c5fb;
+  border-color: #8b5cf6;
+  color: #0f172a;
+}
+
+.chip.sort {
+  gap: 14px;
+}
+
+.caret {
+  border: 4px solid transparent;
+  border-top: 5px solid #94a3b8;
+  margin-top: 5px;
+}
+
+.result-list {
+  display: flex;
+  gap: 50px;
+  overflow-x: auto;
+  padding-bottom: 16px;
+}
+
+.result-card {
+  flex: 0 0 220px;
+  background: #fff;
 }
 
 .poster {
@@ -117,29 +178,45 @@
   justify-content: center;
 }
 
-.content-card h3 {
-    font-size: 13px;
-    margin-bottom: 4px;
+.platform {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  background: #1e1b4b;
+  color: #c7c2ff;
+  font-size: 12px;
+  padding: 3px 13px;
+  border-radius: 999px;
 }
 
-.content-card p {
-    font-size: 11px;
-    color: #777;
+.card-info {
+  padding: 8px 10px 16px;
 }
 
-.content-box {
-    width: 100%;
-    height: 300px;
-    margin-top: 50px;
-
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #f8f8f8;
+.meta {
+  font-size: 11px;
+  color: #475569;
 }
 
-.content-card {
-    width: 150px;
-    text-decoration: none;
-    color: inherit;
+.card-info h3 {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 3px 0 6px;
 }
 
+.desc {
+  font-size: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #d4d4d8;
+  margin-bottom: 10px;
+}
+
+.score {
+  font-size: 12px;
+  color: #334155;
+}
+
+.score::before {
+  content: "★ ";
+  color: #a78bfa;
+}
