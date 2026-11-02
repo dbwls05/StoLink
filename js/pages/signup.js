@@ -2,7 +2,7 @@ import { signUp } from "../supabase/auth.js";
 
 const form = document.getElementById("signup-form");
 const errorEl = document.getElementById("signup-error");
-const submitBtn = form.querySelector(".btn-login");
+const submitBtn = document.querySelector(".btn-login");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();

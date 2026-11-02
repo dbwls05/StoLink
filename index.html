@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StoLink</title>
     <link rel="stylesheet" href="./css/home.css" />
+    <link rel="stylesheet" href="./css/common/header.css" />
   </head>
   <body>
     <header class="site-header">
-      <a href="/index.html" class="logo">StoLink</a>
+      <a href="/index.html" class="logo"
+        ><img src="assets/logo/logo.svg" alt=""
+      /></a>
       <nav class="user-menu">
         <a href="/pages/login.html" class="login-link">로그인</a>
         <a href="/pages/signup.html" class="signup-btn">회원가입</a>
@@ -18,11 +21,24 @@
     <section class="hero">
       <h1>StoLink에서 콘텐츠 탐험을 시작하세요</h1>
       <form class="search-bar" action="/pages/search.html">
-        <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="1.6" stroke-linecap="round">
+        <svg
+          class="search-icon"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#475569"
+          stroke-width="1.6"
+          stroke-linecap="round"
+        >
           <circle cx="11" cy="11" r="8" />
           <path d="M17 17l5 5" />
         </svg>
-        <input type="text" name="q" placeholder="작품명, 배우, 감독을 검색해보세요" />
+        <input
+          type="text"
+          name="q"
+          placeholder="작품명, 배우, 감독을 검색해보세요"
+        />
         <button type="submit">검색</button>
       </form>
     </section>
@@ -45,5 +61,6 @@
     </main>
 
     <script src="./js/pages/home.js"></script>
+    <script type="module" src="./js/common/header.js"></script>
   </body>
 </html>
