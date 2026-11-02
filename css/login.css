@@ -6,6 +6,7 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 60px 20px 80px;
+  background-color: #283044;
 }
 
 .stolink-logo {
@@ -14,7 +15,10 @@ body {
 }
 
 .login-card {
-  width: clamp(480px, 42vw, 760px);
+  box-sizing: border-box;
+  width: 600px;
+  max-width: 100%;
+  min-height: 650px;
   padding: 40px 50px 50px;
   display: flex;
   flex-direction: column;
@@ -98,10 +102,18 @@ body {
   color: #e0435c;
 }
 
+.login-bottom {
+  width: 80%;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .btn-login {
   width: 100%;
   height: 52px;
-  margin-top: 8px;
+  margin-top: 0;
   background: #d0bcff;
   border: 1px solid #e8a2b4;
   border-radius: 26px;

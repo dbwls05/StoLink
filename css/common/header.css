@@ -1,0 +1,51 @@
+.site-header {
+  background: #0f172a;
+  height: 100px;
+  padding: 0 100px 0 50px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo img {
+  width: 200px;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.login-link {
+  color: #fff;
+  font-size: 18px;
+}
+
+.signup-btn {
+  background: #4f46e5;
+  color: #fff;
+  font-size: 18px;
+  padding: 12px 24px;
+  border-radius: 999px;
+}
+
+.profile-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #4f46e5;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profile-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
