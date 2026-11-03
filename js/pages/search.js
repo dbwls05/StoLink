@@ -1,6 +1,14 @@
 // 임시 화면용 더미 카드 렌더링 (API 연동 시 교체)
-import { getPopularMovie } from "../api/tmdb.js"
-const movies = (await getPopularMovie()) || [];
+import { getPopularMovie, searchMovie } from "../api/tmdb.js"
+
+const param = new URLSearchParams(location.search)
+const query = (param.get("q") || "").trim()
+
+const movies = query ? (await searchMovie(query)) || [] : (await getPopularMovie());
+
+document.getElementById("keyword").textContent = query || "인기영화"
+document.getElementById("total").textContent = movies.length;
+document.querySelector(".search-bar input").value = query
 
 function renderResult(movies) {
   const list = document.getElementById("result-list");
@@ -21,6 +29,7 @@ function renderResult(movies) {
           <p class="meta">${movie.release_date.slice(0, 4)} · 영화</p>
           <h3>${movie.title}</h3>
           <p class="desc">${movie.overview || "줄거리 정보가 없습니다."}</p>
+          <button type="button" class="more-btn">더보기</button>
           <p class="score">${movie.vote_average.toFixed(1)}</p>
         </div>
       </a>
@@ -30,3 +39,11 @@ function renderResult(movies) {
 }
 
 renderResult(movies)
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "F5") {
+    e.preventDefault()
+
+    location.href = "search.html"
+  }
+})
