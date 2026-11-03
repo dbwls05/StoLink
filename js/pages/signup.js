@@ -2,7 +2,7 @@ import { signUp } from "../supabase/auth.js";
 
 const form = document.getElementById("signup-form");
 const errorEl = document.getElementById("signup-error");
-const submitBtn = form.querySelector(".btn-login");
+const submitBtn = document.querySelector(".btn-login");
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -30,7 +30,5 @@ form.addEventListener("submit", async (e) => {
     location.href = "../index.html";
     return;
   }
-
-  alert("가입 확인 메일을 보냈어요. 이메일을 확인한 뒤 로그인해주세요.");
   location.href = "./login.html";
 });
