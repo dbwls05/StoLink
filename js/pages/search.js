@@ -1,10 +1,10 @@
-// 임시 화면용 더미 카드 렌더링 (API 연동 시 교체)
+// 검색 결과 카드 랜더링
 import { getPopularMovie, searchMovie } from "../api/tmdb.js"
 
 const param = new URLSearchParams(location.search)
 const query = (param.get("q") || "").trim()
 
-const movies = query ? (await searchMovie(query)) || [] : (await getPopularMovie());
+const movies = query ? (await searchMovie(query)) || [] : (await getPopularMovie()) || [];
 
 document.getElementById("keyword").textContent = query || "인기영화"
 document.getElementById("total").textContent = movies.length;
@@ -17,7 +17,7 @@ function renderResult(movies) {
     .map(
       (movie) => `
     <li class="result-card">
-      <a href="work.html">
+      <a href="work.html?id=${movie.id}">
         <div class="poster">
           <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
           <button type="button" class="bookmark" aria-label="저장">
@@ -40,10 +40,18 @@ function renderResult(movies) {
 
 renderResult(movies)
 
+document.getElementById("result-list").addEventListener("click", (e) => {
+  const btn = e.target.closest(".more-btn")
+  if (!btn) return;
+  e.preventDefault() // 링크 이동 막기
+  const desc = btn.previousElementSibling;
+  const open = desc.classList.toggle("expanded")
+  btn.textContent = open ? "접기" : "더보기"
+})
+
 document.addEventListener("keydown", (e) => {
   if (e.key === "F5") {
-    e.preventDefault()
-
+    e.preventDefault() // 브라우저가 해당 이벤트에 대해 기본적으로 수행하는 동작을 취소(막는) 메서드
     location.href = "search.html"
   }
 })

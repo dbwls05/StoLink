@@ -226,11 +226,11 @@ button {
 
 .desc {
   font-size: 14px;
-  padding-bottom: 14px;
-  /* line-clamp: 3; */
-  -webkit-line-clamp: 3;
+  display: -webkit-box;
+  line-clamp: 4;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
-  border-bottom: 1px solid #d4d4d8;
+  overflow: hidden;
   margin-bottom: 10px;
 }
 
