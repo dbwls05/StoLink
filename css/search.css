@@ -143,13 +143,31 @@ button {
 .desc {
   font-size: 14px;
   padding-bottom: 14px;
+  /* line-clamp: 3; */
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
   border-bottom: 1px solid #d4d4d8;
+  margin-bottom: 10px;
+}
+
+.desc.expanded {
+  display: block;
+  overflow: visible;
+}
+
+.more-btn {
+  background: none;
+  color: #6d4ef5;
+  font-size: 12px;
+  padding: 0;
   margin-bottom: 10px;
 }
 
 .score {
   font-size: 12px;
   color: #334155;
+  padding-top: 10px;
+  border-top: 1px solid #d4d4d8;
 }
 
 .score::before {
