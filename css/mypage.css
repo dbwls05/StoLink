@@ -10,75 +10,11 @@ body {
 }
 
 /* ===== 헤더 ===== */
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 90px;
-  height: 80px;
-  background-color: #432d30;
-}
-
-#logo {
-  margin: 0;
-  font-size: 30px;
-  font-weight: 400;
-  color: #fff;
-}
-
-.search-bar {
-  display: flex;
-  align-items: center;
-  width: 480px;
-  height: 44px;
-  padding: 0 8px 0 16px;
-  background-color: #fff;
-  border-radius: 22px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
-}
-
-.search-bar input {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
-  padding: 0 8px 0 28px;
-  border: none;
-  outline: none;
-  font-size: 14px;
-  background: transparent
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23666' stroke-width='1.5' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='M11 11l4 4'/%3E%3C/svg%3E")
-    no-repeat left center;
-}
-
-.search-bar button {
-  padding: 6px 14px;
-  border: none;
-  border-radius: 14px;
-  background-color: #f0f0f0;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.login-signup {
-  display: flex;
-  gap: 20px;
-  white-space: nowrap;
-}
-
-.login-signup a {
-  display: inline-block;
-  border-radius: 999px;
-  color: #ffffff;
-  font-size: 13px;
-  text-decoration: none;
-}
-
 .mypage {
   max-width: 860px;
   margin: 0 auto;
   padding: 56px 24px 100px;
 }
-
 /* ===== 프로필 ===== */
 
 .placeholder-img {
