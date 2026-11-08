@@ -1,30 +1,52 @@
 // 임시 화면용 더미 카드 렌더링 (API 연동 시 교체)
-function cardTemplate(rank) {
+function cardTemplate(rank, ott) {
   return `
     <li class="card-item">
-      ${rank ? `<span class="rank-num">${rank}</span>` : ""}
       <a href="/pages/work.html" class="card">
         <div class="poster">
-          <button type="button" class="bookmark" aria-label="저장">
-            <svg width="12" height="14" viewBox="0 0 12 14" fill="none" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"><path d="M2 1.5h8v11L6 9.5l-4 3z"/></svg>
-          </button>
-          <span class="rating">★ 4.5</span>
+          <span class="type-badge">영화</span>
         </div>
-        <div class="card-info">
-          <p class="meta">년도 · 유형 · 장르</p>
-          <h3>컨텐츠 제목</h3>
+        <div class="card-body">
+          ${rank ? `<span class="rank-num">${rank}</span>` : ""}
+          <div class="card-text">
+            <h3>컨텐츠 제목</h3>
+            <p class="meta">년도 · 장르</p>
+            <span class="ott-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8"/></svg>
+              ${ott}
+            </span>
+          </div>
         </div>
       </a>
     </li>`;
 }
-
-function renderRow(id, withRank) {
+function renderRow(id, withRank, count = 5, ott) {
   const el = document.getElementById(id);
-  el.innerHTML = [1, 2, 3, 4, 5]
-    .map((n) => cardTemplate(withRank ? n : null))
-    .join("");
+  el.innerHTML = Array.from({ length: count }, (_, i) =>
+    cardTemplate(withRank ? i + 1 : null, ott),
+  ).join("");
 }
 
-renderRow("ranking-list", true);
-renderRow("movie-list", false);
-renderRow("drama-list", false);
+renderRow("ranking-list", false, 10, "넷플릭스");
+
+const ottCounts = { 넷플릭스: 4, "디즈니+": 3, 티빙: 3 };
+
+function renderOtt(ott) {
+  const el = document.getElementById("ott-list");
+  const count = ottCounts[ott] || 4;
+  el.innerHTML = Array.from({ length: count }, () =>
+    cardTemplate(null, ott),
+  ).join("");
+}
+
+document.querySelectorAll("#ott-tabs .tab").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll("#ott-tabs .tab")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    renderOtt(btn.dataset.ott);
+  });
+});
+
+renderOtt("넷플릭스");
