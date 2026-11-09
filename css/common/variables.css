@@ -1,0 +1,129 @@
+/* ===== 기본 색 (라이트) ===== */
+:root {
+  /* 포인트 색 */
+  --primary: #a078ff;
+  --primary-active: #8656f0;
+  --primary-disabled: #e6dcff;
+
+  /* 배경 */
+  --canvas: #ffffff;
+  --surface-soft: #f8fafc;
+  --surface-strong: #e2e8f0;
+
+  /* 선 */
+  --hairline: #cbd5e1;
+  --hairline-soft: #e2e8f0;
+  --border-strong: #94a3b8;
+
+  /* 글자 */
+  --ink: #0f172a;
+  --body: #334155;
+  --muted: #64748b;
+  --muted-soft: #94a3b8;
+  --on-primary: #ffffff;
+  --error: #c13515;
+
+  /* 폰트 */
+  --font-sans:
+    "Pretendard Variable", Pretendard, -apple-system, system-ui,
+    "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+
+  /* 간격 */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-base: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+  --space-section: 64px;
+
+  /* 모서리 */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-full: 9999px;
+
+  /* 그림자 */
+  --shadow:
+    rgba(0, 0, 0, 0.02) 0 0 0 1px, rgba(0, 0, 0, 0.04) 0 2px 6px 0,
+    rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+
+  /* Bootstrap 기본값도 같이 맞추기 */
+  --bs-body-font-family: var(--font-sans);
+  --bs-body-color: var(--ink);
+  --bs-body-bg: var(--canvas);
+  --bs-border-color: var(--hairline);
+}
+
+/* ===== 네이비 영역 (헤더, 메인 첫 화면, 프로필 카드, 푸터) ===== */
+.navy-section {
+  --primary-active: #b89cff;
+  --primary-disabled: #3b2e63;
+  --canvas: #0f172a;
+  --surface-soft: #1e293b;
+  --surface-strong: #334155;
+  --hairline: #334155;
+  --hairline-soft: #1e293b;
+  --border-strong: #475569;
+  --ink: #f8fafc;
+  --body: #cbd5e1;
+  --muted: #94a3b8;
+  --muted-soft: #64748b;
+  --error: #ff8a6b;
+  --shadow:
+    rgba(255, 255, 255, 0.06) 0 0 0 1px, rgba(0, 0, 0, 0.45) 0 4px 12px 0;
+
+  background: var(--canvas);
+  color: var(--ink);
+  color-scheme: dark;
+}
+
+/* ===== 다크 모드 (<html>에 dark-mode 클래스 붙이면 적용) ===== */
+.dark-mode,
+.dark-mode .navy-section {
+  --primary-active: #b89cff;
+  --primary-disabled: #3b2e63;
+  --canvas: #121212;
+  --surface-soft: #1b1b1b;
+  --surface-strong: #272727;
+  --hairline: #363636;
+  --hairline-soft: #2a2a2a;
+  --border-strong: #555555;
+  --ink: #f2f2f2;
+  --body: #d4d4d4;
+  --muted: #a3a3a3;
+  --muted-soft: #777777;
+  --error: #ff8a6b;
+  --shadow:
+    rgba(255, 255, 255, 0.06) 0 0 0 1px, rgba(0, 0, 0, 0.5) 0 4px 12px 0;
+
+  --bs-body-color: var(--ink);
+  --bs-body-bg: var(--canvas);
+  --bs-border-color: var(--hairline);
+  color-scheme: dark;
+}
+
+/* ===== 기본 적용 ===== */
+body {
+  font-family: var(--font-sans);
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.navy-section a,
+.dark-mode a {
+  color: var(--primary-active);
+}
+
+/* Bootstrap 버튼 보라색으로 */
+.btn-primary {
+  --bs-btn-bg: var(--primary);
+  --bs-btn-border-color: var(--primary);
+  --bs-btn-hover-bg: var(--primary-active);
+  --bs-btn-hover-border-color: var(--primary-active);
+  --bs-btn-active-bg: var(--primary-active);
+  --bs-btn-active-border-color: var(--primary-active);
+  --bs-btn-color: var(--on-primary);
+  --bs-btn-hover-color: var(--on-primary);
+  border-radius: var(--radius-sm);
+}
