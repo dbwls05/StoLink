@@ -1,167 +1,194 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>StoLink - 작품 상세</title>
-    <link rel="stylesheet" href="../css/common/header.css">
-    <link rel="stylesheet" href="../css/detail.css">
-</head>
+    <link rel="stylesheet" href="../css/detail.css" />
+    <link rel="stylesheet" href="../css/common/variables.css" />
+    <link rel="stylesheet" href="../css/common/header.css" />
+  </head>
 
-<body>
+  <body>
     <!-- 헤더 -->
-    <header class="site-header">
-        <a href="/index.html" class="logo"><img src="../assets/logo/logo.svg" alt="" /></a>
-        <form class="search-bar" action="search.html">
-            <input type="text" name="q" />
-        </form>
-        <nav class="user-menu">
-            <a href="/pages/login.html" class="login-link">로그인</a>
-            <a href="/pages/signup.html" class="signup-btn">회원가입</a>
-        </nav>
+    <header class="site-header navy-section">
+      <a href="/index.html" class="logo"
+        ><img src="../assets/logo/logo.svg" alt=""
+      /></a>
+      <form class="search-bar" action="search.html">
+        <input type="text" name="q" />
+      </form>
+      <nav class="user-menu">
+        <a href="/pages/login.html" class="login-link">로그인</a>
+        <a href="/pages/signup.html" class="signup-btn">회원가입</a>
+      </nav>
     </header>
 
     <main class="detail-page">
-        <a href="search.html" class="back-link">검색 결과로</a>
+      <a href="search.html" class="back-link">검색 결과로</a>
 
-        <!-- 상단 정보 -->
-        <section class="hero">
-            <div class="hero-poster" id="poster"></div>
+      <!-- 상단 정보 -->
+      <section class="hero">
+        <div class="hero-poster" id="poster"></div>
 
-            <div class="hero-info">
-                <div class="badges">
-                    <span class="badge">영화</span>
-                </div>
-                <h1 id="title">제목</h1>
-                <p class="sub" id="sub">-</p>
-                <ul class="genre-list" id="genres"></ul>
-                <p class="overview" id="overview"></p>
+        <div class="hero-info">
+          <div class="badges">
+            <span class="badge">영화</span>
+          </div>
+          <h1 id="title">제목</h1>
+          <p class="sub" id="sub">-</p>
+          <ul class="genre-list" id="genres"></ul>
+          <p class="overview" id="overview"></p>
 
-                <dl class="info-list">
-                    <div>
-                        <dt>개봉</dt>
-                        <dd id="release">-</dd>
-                    </div>
-                    <div>
-                        <dt>제작</dt>
-                        <dd id="company">-</dd>
-                    </div>
-                    <div>
-                        <dt>연출</dt>
-                        <dd id="director">-</dd>
-                    </div>
-                    <div>
-                        <dt>각본</dt>
-                        <dd id="writer">-</dd>
-                    </div>
-                    <div>
-                        <dt>원작</dt>
-                        <dd id="author">-</dd>
-                    </div>
-                </dl>
+          <dl class="info-list">
+            <div>
+              <dt>개봉</dt>
+              <dd id="release">-</dd>
             </div>
-
-            <!-- 내 보관함 -->
-            <aside class="save-box">
-                <h2>내 보관함</h2>
-                <label for="status">시청 상태</label>
-                <select id="status">
-                    <option>볼 예정</option>
-                    <option>보는 중</option>
-                    <option>시청 완료</option>
-                </select>
-                <button type="button" class="save-btn">보관함에 저장</button>
-                <p class="save-note">저장한 작품은 <strong>내 보관함</strong>에서 관리할 수 있어요.</p>
-            </aside>
-        </section>
-
-        <!-- 출연 -->
-        <section class="cast-section">
-            <h2>출연</h2>
-            <ul class="cast-list" id="cast-list"></ul>
-        </section>
-
-        <!-- 원작 정보 -->
-        <section class="origin-section">
-            <h2>원작 정보</h2>
-            <a href="author-detail.html" class="origin-card">
-                <div class="origin-thumb"></div>
-                <div class="origin-text">
-                    <span class="origin-label">원작 웹툰</span>
-                    <strong>미생</strong>
-                    <p>윤태호 · 다음웹툰 · 2012 연재 시작</p>
-                </div>
-                <span class="origin-link">작가 페이지로</span>
-            </a>
-        </section>
-
-        <!-- 이어서 탐색하기 -->
-        <section class="explore-section">
-            <h2>이어서 탐색하기</h2>
-            <p class="explore-desc">이 작품의 사람들을 따라 다른 작품으로 넘어가 보세요.</p>
-
-            <div class="explore-grid">
-                <div class="explore-box">
-                    <p class="explore-who"><span class="mini-photo"></span><span><small>배우</small><strong>임시완의 다른
-                                작품</strong></span></p>
-                    <ul class="explore-works">
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>변호인</p><small>영화 · 2013</small>
-                        </li>
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>불한당</p><small>영화 · 2017</small>
-                        </li>
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>타인은 지옥이다</p><small>드라마 · 2019</small>
-                        </li>
-                    </ul>
-                </div>
-                <div class="explore-box">
-                    <p class="explore-who"><span class="mini-photo"></span><span><small>원작 작가</small><strong>윤태호의 다른
-                                작품</strong></span></p>
-                    <ul class="explore-works">
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>내부자들</p><small>영화 · 2015</small>
-                        </li>
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>이끼</p><small>영화 · 2010</small>
-                        </li>
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>파인: 촌뜨기들</p><small>드라마 · 2025</small>
-                        </li>
-                    </ul>
-                </div>
-                <div class="explore-box">
-                    <p class="explore-who"><span class="mini-photo"></span><span><small>감독</small><strong>김원석의 다른
-                                작품</strong></span></p>
-                    <ul class="explore-works">
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>시그널</p><small>드라마 · 2016</small>
-                        </li>
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>나의 아저씨</p><small>드라마 · 2018</small>
-                        </li>
-                        <li>
-                            <div class="work-thumb"></div>
-                            <p>이스닷 변대기</p><small>드라마 · 2019</small>
-                        </li>
-                    </ul>
-                </div>
+            <div>
+              <dt>제작</dt>
+              <dd id="company">-</dd>
             </div>
-        </section>
+            <div>
+              <dt>연출</dt>
+              <dd id="director">-</dd>
+            </div>
+            <div>
+              <dt>각본</dt>
+              <dd id="writer">-</dd>
+            </div>
+            <div>
+              <dt>원작</dt>
+              <dd id="author">-</dd>
+            </div>
+          </dl>
+        </div>
+
+        <!-- 내 보관함 -->
+        <aside class="save-box">
+          <h2>내 보관함</h2>
+          <label for="status">시청 상태</label>
+          <select id="status">
+            <option>볼 예정</option>
+            <option>보는 중</option>
+            <option>시청 완료</option>
+          </select>
+          <button type="button" class="save-btn">보관함에 저장</button>
+          <p class="save-note">
+            저장한 작품은 <strong>내 보관함</strong>에서 관리할 수 있어요.
+          </p>
+        </aside>
+      </section>
+
+      <!-- 출연 -->
+      <section class="cast-section">
+        <h2>출연</h2>
+        <ul class="cast-list" id="cast-list"></ul>
+      </section>
+
+      <!-- 원작 정보 -->
+      <section class="origin-section">
+        <h2>원작 정보</h2>
+        <a href="author-detail.html" class="origin-card">
+          <div class="origin-thumb"></div>
+          <div class="origin-text">
+            <span class="origin-label">원작 웹툰</span>
+            <strong>미생</strong>
+            <p>윤태호 · 다음웹툰 · 2012 연재 시작</p>
+          </div>
+          <span class="origin-link">작가 페이지로</span>
+        </a>
+      </section>
+
+      <!-- 이어서 탐색하기 -->
+      <section class="explore-section">
+        <h2>이어서 탐색하기</h2>
+        <p class="explore-desc">
+          이 작품의 사람들을 따라 다른 작품으로 넘어가 보세요.
+        </p>
+
+        <div class="explore-grid">
+          <div class="explore-box">
+            <p class="explore-who">
+              <span class="mini-photo"></span
+              ><span
+                ><small>배우</small><strong>임시완의 다른 작품</strong></span
+              >
+            </p>
+            <ul class="explore-works">
+              <li>
+                <div class="work-thumb"></div>
+                <p>변호인</p>
+                <small>영화 · 2013</small>
+              </li>
+              <li>
+                <div class="work-thumb"></div>
+                <p>불한당</p>
+                <small>영화 · 2017</small>
+              </li>
+              <li>
+                <div class="work-thumb"></div>
+                <p>타인은 지옥이다</p>
+                <small>드라마 · 2019</small>
+              </li>
+            </ul>
+          </div>
+          <div class="explore-box">
+            <p class="explore-who">
+              <span class="mini-photo"></span
+              ><span
+                ><small>원작 작가</small
+                ><strong>윤태호의 다른 작품</strong></span
+              >
+            </p>
+            <ul class="explore-works">
+              <li>
+                <div class="work-thumb"></div>
+                <p>내부자들</p>
+                <small>영화 · 2015</small>
+              </li>
+              <li>
+                <div class="work-thumb"></div>
+                <p>이끼</p>
+                <small>영화 · 2010</small>
+              </li>
+              <li>
+                <div class="work-thumb"></div>
+                <p>파인: 촌뜨기들</p>
+                <small>드라마 · 2025</small>
+              </li>
+            </ul>
+          </div>
+          <div class="explore-box">
+            <p class="explore-who">
+              <span class="mini-photo"></span
+              ><span
+                ><small>감독</small><strong>김원석의 다른 작품</strong></span
+              >
+            </p>
+            <ul class="explore-works">
+              <li>
+                <div class="work-thumb"></div>
+                <p>시그널</p>
+                <small>드라마 · 2016</small>
+              </li>
+              <li>
+                <div class="work-thumb"></div>
+                <p>나의 아저씨</p>
+                <small>드라마 · 2018</small>
+              </li>
+              <li>
+                <div class="work-thumb"></div>
+                <p>이스닷 변대기</p>
+                <small>드라마 · 2019</small>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
     </main>
 
     <script type="module" src="../js/pages/detail.js"></script>
     <script type="module" src="../js/common/header.js"></script>
-</body>
-
+  </body>
 </html>

@@ -1,42 +1,47 @@
 <!doctype html>
 <html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StoLink - 검색 결과</title>
+    <link rel="stylesheet" href="../css/search.css" />
+    <link rel="stylesheet" href="../css/common/variables.css" />
+    <link rel="stylesheet" href="../css/common/header.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StoLink - 검색 결과</title>
-  <link rel="stylesheet" href="../css/search.css" />
-  <link rel="stylesheet" href="../css/common/header.css" />
-</head>
+  <body>
+    <header class="site-header navy-section">
+      <a href="/index.html" class="logo"
+        ><img src="../assets/logo/logo.svg" alt=""
+      /></a>
+      <form class="search-bar" action="search.html">
+        <input type="text" name="q" />
+      </form>
+      <nav class="user-menu">
+        <a href="/pages/login.html" class="login-link">로그인</a>
+        <a href="/pages/signup.html" class="signup-btn">회원가입</a>
+      </nav>
+    </header>
 
-<body>
-  <header class="site-header">
-    <a href="/index.html" class="logo"><img src="../assets/logo/logo.svg" alt="" /></a>
-    <form class="search-bar" action="search.html">
-      <input type="text" name="q" />
-    </form>
-    <nav class="user-menu">
-      <a href="/pages/login.html" class="login-link">로그인</a>
-      <a href="/pages/signup.html" class="signup-btn">회원가입</a>
-    </nav>
-  </header>
+    <main class="search-result">
+      <h1 class="result-title">
+        ‘<span id="keyword">검색어</span>’ 검색결과 <span id="total">00</span>건
+      </h1>
 
-  <main class="search-result">
-    <h1 class="result-title">‘<span id="keyword">검색어</span>’ 검색결과 <span id="total">00</span>건</h1>
+      <nav class="filter">
+        <button type="button" class="chip active">전체 <span>00</span></button>
+        <button type="button" class="chip">영화 <span>00</span></button>
+        <button type="button" class="chip">드라마·TV <span>00</span></button>
+        <button type="button" class="chip">웹툰 <span>00</span></button>
+        <button type="button" class="chip sort">
+          정렬 <i class="caret"></i>
+        </button>
+      </nav>
 
-    <nav class="filter">
-      <button type="button" class="chip active">전체 <span>00</span></button>
-      <button type="button" class="chip">영화 <span>00</span></button>
-      <button type="button" class="chip">드라마·TV <span>00</span></button>
-      <button type="button" class="chip">웹툰 <span>00</span></button>
-      <button type="button" class="chip sort">정렬 <i class="caret"></i></button>
-    </nav>
+      <ul class="result-list" id="result-list"></ul>
+    </main>
 
-    <ul class="result-list" id="result-list"></ul>
-  </main>
-
-  <script type="module" src="../js/pages/search.js"></script>
-  <script type="module" src="../js/common/header.js"></script>
-</body>
-
+    <script type="module" src="../js/pages/search.js"></script>
+    <script type="module" src="../js/common/header.js"></script>
+  </body>
 </html>
