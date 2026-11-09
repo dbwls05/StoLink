@@ -17,7 +17,7 @@ function renderResult(movies) {
     .map(
       (movie) => `
     <li class="result-card">
-      <a href="work.html?id=${movie.id}">
+      <a href="detail.html?id=${movie.id}">
         <div class="poster">
           <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
           <button type="button" class="bookmark" aria-label="저장">
