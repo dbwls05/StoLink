@@ -1,0 +1,141 @@
+/* =========================================================
+   save-box.css - 작품 상세의 '내 보관함' 상자 추가 스타일
+   - detail.css 의 .save-box 스타일 위에 덧붙여 쓰는 파일
+   - detail.html 에서 detail.css 다음 줄에 연결
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   보관함에 저장 버튼
+--------------------------------------------------------- */
+/* 하트 아이콘과 글자를 가운데 정렬 */
+.save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+/* 저장된 상태: 속이 빈 보라 테두리 버튼 (한 번 더 누르면 빠짐) */
+.save-btn[aria-pressed="true"] {
+  background: transparent;
+  border: 1px solid #a78bfa;
+  color: #c4b5fd;
+}
+
+.save-btn[aria-pressed="true"]:hover {
+  background: rgba(167, 139, 250, 0.12);
+}
+
+/* 보관함 모듈이 없을 때 */
+.save-btn:disabled {
+  background: #334155;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* '내 보관함' 링크 글자 */
+.save-note a {
+  color: #c4b5fd;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* ---------------------------------------------------------
+   볼 수 있는 곳
+--------------------------------------------------------- */
+.provider-section {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #334155; /* 위 보관함 영역과 구분선 */
+}
+
+.provider-title {
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.provider-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 서비스 한 줄: [로고] 이름/종류 ......... ↗ */
+.provider-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.provider-item:hover {
+  border-color: #a78bfa;
+  background: rgba(167, 139, 250, 0.08);
+}
+
+/* 로고 칸: 로고가 없으면 서비스 이름 첫 글자 */
+.provider-logo {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #334155;
+  font-size: 14px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.provider-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.provider-text {
+  flex: 1;
+  min-width: 0; /* 긴 이름이 줄을 밀어내지 않게 */
+}
+
+.provider-text strong {
+  display: block;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.provider-text small {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.provider-arrow {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.provider-item:hover .provider-arrow {
+  color: #c4b5fd;
+}
+
+/* 출처 표시 (JustWatch 데이터는 출처를 밝혀야 함) */
+.provider-source {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #64748b;
+}

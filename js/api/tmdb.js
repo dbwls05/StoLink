@@ -19,8 +19,15 @@ export async function getPopularMovie() {
   }
 }
 
-export async function getWatchProviders(movieId) {
-  const url = `${BASE_URL}/movie/${movieId}/watch/providers?api_key=${TMDB_API_KEY}`;
+// 볼 수 있는 곳 (OTT) - TMDB 가 JustWatch 데이터로 제공
+// media : "movie"(기본) 또는 "tv" → 기존처럼 getWatchProviders(영화번호) 로 쓰면 영화
+// 결과(한국 기준) 예:
+//   { link: "https://www.themoviedb.org/movie/293413/watch?locale=KR",  ← 작품별 시청 정보 페이지 1개
+//     flatrate: [{ provider_name, logo_path, display_priority }, ...],  ← 구독
+//     rent: [...], buy: [...], free: [...], ads: [...] }               ← 대여 / 구매 / 무료 / 광고 포함 무료
+// 한국에서 볼 수 있는 곳이 없으면 undefined
+export async function getWatchProviders(movieId, media = "movie") {
+  const url = `${BASE_URL}/${media}/${movieId}/watch/providers?api_key=${TMDB_API_KEY}`;
 
   try {
     const response = await fetch(url);
@@ -124,6 +131,64 @@ export async function getTvDetail(id) {
     return await response.json();
   } catch (e) {
     console.log("TMDB 드라마 상세 에러", e);
+  }
+}
+
+// 드라마 상세 + 출연진·제작진 (detail.html 의 드라마 화면용)
+// - aggregate_credits : 모든 시즌·회차를 합친 출연진/제작진
+//   (credits 는 '마지막 시즌'만 담고 있어서 드라마에는 aggregate_credits 가 정확함)
+//   · cast[i].roles[0].character : 배역 이름
+//   · crew[i].jobs[0].job        : 직무 (Director, Writer, Comic Book ...)
+export async function getTvDetailWithCredits(id) {
+  const url = `${BASE_URL}/tv/${id}?api_key=${TMDB_API_KEY}&language=ko-KR&append_to_response=aggregate_credits`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Http 통신 오류 ${response.status}`);
+    }
+    return await response.json();
+  } catch (e) {
+    console.log("TMDB 드라마 상세 에러", e);
+  }
+}
+
+// 드라마를 볼 수 있는 곳 (getWatchProviders 의 드라마 버전, 한국 기준)
+// 결과 예: { link: "https://www.themoviedb.org/tv/61678/watch?locale=KR",
+//           flatrate: [{ provider_name: "티빙", logo_path: "/..png" }],  ← 구독
+//           rent: [...], buy: [...], ads: [...], free: [...] }        ← 대여 / 구매 / 광고 / 무료
+// 정보 출처: JustWatch (화면에 출처 표시 필요)
+export async function getTvWatchProviders(tvId) {
+  const url = `${BASE_URL}/tv/${tvId}/watch/providers?api_key=${TMDB_API_KEY}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Http 통신 오류 ${response.status}`);
+    }
+    const data = await response.json();
+    return data.results?.KR; // 한국 기준 제공처만
+  } catch (error) {
+    console.log("드라마 OTT 정보 호출 에러", error);
+  }
+}
+
+// 장르 목록 (장르 번호 → 이름) - 영화와 드라마는 장르 목록이 따로 있음
+// media : "movie" 또는 "tv"
+// 결과 예: [{ id: 80, name: "범죄" }, { id: 18, name: "드라마" }, ...]
+export async function getGenreList(media = "movie") {
+  const url = `${BASE_URL}/genre/${media}/list?api_key=${TMDB_API_KEY}&language=ko-KR`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Http 통신 오류 ${response.status}`);
+    }
+    const data = await response.json();
+    return data.genres;
+  } catch (e) {
+    console.log("TMDB 장르 목록 에러", e);
+    return [];
   }
 }
 
