@@ -46,7 +46,7 @@ function toCardItem(movie, rank) {
 function cardTemplate(item) {
   return `
     <li class="card-item">
-      <a href="/pages/work.html?id=${item.id}" class="card">
+      <a href="/pages/detail.html?id=${item.id}" class="card">
         <div class="poster">
           ${item.poster ? `<img src="${item.poster}" alt="${item.title} 포스터" />` : ""}
           <span class="type-badge">${item.type}</span>

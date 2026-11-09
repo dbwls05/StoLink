@@ -42,4 +42,24 @@ if (!movie) {
       </a>
     </li>`
     ).join("");
+
+  // 제작진 (주요 직책 앞 6명)
+  document.getElementById("crew-list").innerHTML = movie.credits.crew
+    .filter((a) =>
+      ["Director", "Writer", "Screenplay", "Producer"].includes(a.job)
+    )
+    .slice(0, 6)
+    .map(
+      (a) => `
+    <li class="cast-card">
+      <a href="person-detail.html?id=${a.id}">
+        <div class="cast-photo">
+          ${a.profile_path ? `<img src="${IMG}/w185${a.profile_path}" alt="${a.name}">` : ""}
+        </div>
+        <p class="cast-name">${a.name}</p>
+        <p class="cast-role">${a.job}</p>
+      </a>
+    </li>`
+    )
+    .join("");
 }
