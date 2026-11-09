@@ -529,6 +529,15 @@ function hasName(item, name) {
   return `${item.sntncWritrNm || ""} ${item.pictrWritrNm || ""}`.split(/[\s,·/()]+/).includes(name);
 }
 
+// 원작자와 같은 사람인지 (실명 ↔ 필명)
+// - TMDB 는 실명("조광진"), 만화규장각은 필명("광진")으로 적힌 경우가 있음
+// - 정확히 같거나, 실명에서 성(한 글자)만 뺀 이름이면 같은 사람으로 봄
+function isSameAuthor(item, name) {
+  if (hasName(item, name)) return true;
+  const names = `${item.sntncWritrNm || ""} ${item.pictrWritrNm || ""}`.split(/[\s,·/()]+/).filter(Boolean);
+  return names.some((n) => n.length >= 2 && name.length === n.length + 1 && name.endsWith(n));
+}
+
 // TMDB 원작자 이름 → 한글 이름 ("Yoon Tae-ho" → "윤태호")
 async function koreanNameOf(person) {
   if (/[가-힣]/.test(person.name)) return person.name;
@@ -582,7 +591,7 @@ async function findOriginal({ media, title, crew }) {
     const matched = items.filter(
       (item) =>
         isSameWork(item.prdctNm || item.title, t) &&
-        (authorNames.length === 0 || authorNames.some((n) => hasName(item, n)))
+        (authorNames.length === 0 || authorNames.some((n) => isSameAuthor(item, n)))
     );
     if (matched.length) return toOriginal(matched, t, authorNames);
   }
