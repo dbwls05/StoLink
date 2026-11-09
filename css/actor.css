@@ -1,3 +1,10 @@
+/* =========================================================
+   actor.css - 배우 상세 페이지
+   - 헤더는 common/header.css 가 담당 (여기서는 본문만)
+   - 작품 상세(detail.css)와 같은 색: 흰 배경 + 짙은 남색 프로필 상자 + 보라 포인트
+   - 클래스 이름은 처음 만들어 둔 틀(actor-info, actor-image, filmography, film-list, work-card ...) 그대로
+   ========================================================= */
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -5,171 +12,429 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    color: #222;
-    background-color: white;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: #fff;
+    color: #0f172a;
 }
 
-
-/* 헤더 */
-header {
-    width: 80%;
-    max-width: 1000px;
-    margin: 25px auto;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.logo {
-    font-size: 22px;
-    font-weight: bold;
-}
-
-
-/* 검색창 */
-.search-box {
-    display: flex;
-    gap: 6px;
-}
-
-.search-box input {
-    width: 280px;
-    height: 32px;
-
-    border: none;
-    border-radius: 16px;
-
-    background-color: #ddd;
-    padding: 0 15px;
-}
-
-.search-box button {
-    width: 50px;
-    height: 32px;
-
-    border: none;
-    border-radius: 5px;
-
-    background-color: #ddd;
-    cursor: pointer;
-}
-
-
-/* 회원 메뉴 */
-.user-menu {
-    display: flex;
-    gap: 20px;
-}
-
-.user-menu a {
+a {
+    color: inherit;
     text-decoration: none;
-    color: #222;
-    font-size: 12px;
 }
 
-
-/* 전체 */
-main {
-    width: 70%;
-    max-width: 1000px;
-    margin: 50px auto;
+/* ---------------------------------------------------------
+   본문 영역
+--------------------------------------------------------- */
+.actor-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 24px 100px;
 }
 
+.back-link {
+    display: inline-block;
+    margin-bottom: 28px;
+    font-size: 13px;
+    color: #475569;
+}
 
-/* 배우 정보 */
+.back-link::before {
+    content: "‹ ";
+}
+
+.back-link:hover {
+    color: #0f172a;
+}
+
+/* ---------------------------------------------------------
+   배우 프로필 (짙은 남색 상자)
+   - 왼쪽: 사진 / 오른쪽: 직업 배지, 이름, 출생·데뷔·출연작
+--------------------------------------------------------- */
 .actor-info {
     display: flex;
     align-items: center;
-
-    gap: 20px;
-    margin-bottom: 30px;
+    gap: 40px;
+    padding: 40px;
+    border-radius: 16px;
+    background: #0f172a;
+    color: #fff;
 }
 
+/* 사진: 세로로 긴 사각형 */
 .actor-image {
-    width: 150px;
-    height: 180px;
+    flex-shrink: 0;
+    width: 200px;
+    height: 260px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #334155;
+}
 
-    background-color: #ddd;
-    border-radius: 5px;
+.actor-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 비율 유지하며 꽉 채움 */
+}
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* 사진이 없을 때: 회색 배경 + 사람 모양 */
+.actor-image.is-default {
+    background: #dcdcdc;
+}
 
+.actor-image.is-default svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: #a8a8a8;
+}
+
+.actor-detail {
+    flex: 1;
+    min-width: 0;
+}
+
+/* 직업 배지 (배우 / 감독 ...) */
+.actor-job {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #a78bfa;
     font-size: 12px;
+    font-weight: 700;
+    color: #fff;
 }
 
 .actor-detail h1 {
-    font-size: 22px;
-    margin-bottom: 12px;
+    margin: 12px 0 20px;
+    font-size: 34px;
+    font-weight: 800;
 }
 
-.actor-detail p {
-    font-size: 13px;
+/* 출생 / 데뷔 / 출연작 */
+.actor-meta {
+    display: grid;
+    gap: 10px;
 }
 
+.actor-meta div {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+}
 
-/* 구분선 */
+.actor-meta dt {
+    flex: 0 0 48px; /* 항목 이름 칸 너비를 맞춰서 값이 한 줄로 정렬되게 */
+    color: #94a3b8;
+}
+
+.actor-meta dd {
+    color: #e2e8f0;
+    font-weight: 600;
+}
+
+/* 정보 출처 */
+.actor-source {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.actor-source a {
+    text-decoration: underline;
+}
+
+/* 불러오는 중: 사진·이름 자리가 깜빡임 */
+.actor-info.is-loading .actor-image,
+.actor-info.is-loading h1 {
+    background: #1e293b;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+.actor-info.is-loading h1 {
+    width: 220px;
+    border-radius: 8px;
+    color: transparent;
+}
+
+.actor-info.is-loading .actor-job {
+    visibility: hidden;
+}
+
+@keyframes pulse {
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ---------------------------------------------------------
+   대표 출연작 (최대 4개)
+--------------------------------------------------------- */
 .filmography {
-    border-top: 1px solid #aaa;
-    padding-top: 15px;
+    margin-top: 44px;
 }
 
 .filmography h2 {
-    font-size: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 700;
 }
 
-
-/* 필모그래피 */
+/* 카드 4개를 한 줄에 (화면이 좁으면 2개씩) */
 .film-list {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
 }
 
 .work-card {
-    width: 90px;
-    flex-shrink: 0;
-
-    text-decoration: none;
-    color: #222;
+    display: block;
 }
 
+/* 포스터 (2:3 비율) */
 .work-poster {
-    width: 90px;
-    height: 120px;
+    position: relative;
+    aspect-ratio: 2 / 3;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #e2e8f0;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
 
-    background-color: #ddd;
-    border-radius: 4px;
+.work-card:hover .work-poster {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.15);
+}
 
+.work-poster img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 포스터가 없을 때 가운데에 작품 이름 */
+.poster-empty {
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    font-size: 10px;
-
-    margin-bottom: 5px;
+    padding: 12px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #94a3b8;
 }
 
-.work-card p {
-    font-size: 10px;
-}
-
-
-/* 더보기 */
-.more-card {
-    width: 60px;
-    height: 120px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    text-decoration: none;
-    color: #222;
+/* 포스터 왼쪽 위 영화/드라마 표시 */
+.work-type {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 3px 10px;
+    border-radius: 999px;
     font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.work-type.is-movie {
+    background: #f97316; /* 영화: 주황 */
+}
+
+.work-type.is-tv {
+    background: #8b5cf6; /* 드라마: 보라 */
+}
+
+.work-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.work-card:hover .work-title {
+    color: #6d4ef5;
+}
+
+.work-date {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* "OO 역" */
+.work-role {
+    margin-top: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8b5cf6;
+}
+
+/* 불러오는 중 카드 */
+.work-card.skeleton {
+    aspect-ratio: 2 / 3;
+    border-radius: 10px;
+    background: #f1f5f9;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+.film-empty {
+    grid-column: 1 / -1;
+    padding: 40px 0;
+    text-align: center;
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+/* ---------------------------------------------------------
+   전체 필모그래피
+   - 제목 오른쪽에 전체 / 영화 / 드라마 탭 (회색 바탕, 고른 탭만 흰색)
+   - 한 줄: 연도 | 작품명 | OO 역 | 영화·드라마 / 웹툰 원작 뱃지
+--------------------------------------------------------- */
+.all-filmography {
+    margin-top: 64px;
+}
+
+.all-film-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.all-film-head h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* 탭 묶음 */
+.film-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    background: #e2e8f0;
+}
+
+.film-tab {
+    padding: 7px 16px;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: #475569;
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.film-tab.is-active {
+    background: #fff;
+    color: #0f172a;
+    font-weight: 700;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12);
+}
+
+/* 목록 */
+.film-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.film-rows li {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.film-row {
+    display: grid;
+    grid-template-columns: 56px 1fr auto auto;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 2px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.film-row:hover {
+    background: #f8fafc;
+}
+
+.film-year {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.film-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.film-row:hover .film-name {
+    color: #6d4ef5;
+}
+
+.film-role {
+    font-size: 12px;
+    color: #475569;
+    text-align: right;
+}
+
+.film-badges {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    min-width: 56px;
+}
+
+/* 영화 / 드라마 / 웹툰 원작 뱃지 */
+.badge {
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge.is-webtoon {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.film-rows .film-empty {
+    border-bottom: none;
+}
+
+/* ---------------------------------------------------------
+   반응형 (768px 이하)
+--------------------------------------------------------- */
+@media (max-width: 768px) {
+    .actor-info {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 24px;
+    }
+
+    .film-list {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .film-row {
+        grid-template-columns: 44px 1fr auto;
+        gap: 10px;
+    }
+
+    .film-role {
+        grid-column: 2;
+        grid-row: 2;
+        text-align: left;
+    }
 }

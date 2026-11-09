@@ -64,7 +64,7 @@ function renderCast(people) {
   document.getElementById("cast-list").innerHTML = people.length
     ? people.map((a) => `
     <li class="cast-card">
-      <a href="person-detail.html?id=${a.id}">
+      <a href="actor.html?id=${a.id}">
         <div class="cast-photo">
           ${a.profile_path ? `<img src="${IMG}/w185${a.profile_path}" alt="${esc(a.name)}">` : ""}
         </div>
@@ -283,7 +283,32 @@ const PROVIDER_KO = {
 };
 const providerName = (name) => PROVIDER_KO[name] || name;
 
-async function renderProviders(media, tmdbId) {
+// 로고를 누르면 갈 곳: 그 서비스에서 작품 제목으로 검색한 화면
+// - TMDB 는 서비스별 작품 주소를 주지 않고 TMDB 의 '볼 수 있는 곳' 페이지 주소(link) 하나만 줌
+//   → 그래서 원래는 어떤 로고를 눌러도 TMDB 사이트로 갔음
+// - 서비스 검색 화면으로 보내면 바로 그 작품을 찾을 수 있음
+// - 검색 주소를 모르는 서비스는 그 서비스 첫 화면, 목록에 없는 서비스만 예전처럼 TMDB 페이지
+const PROVIDER_SEARCH = {
+  넷플릭스: (q) => `https://www.netflix.com/search?q=${q}`,
+  티빙: (q) => `https://www.tving.com/search?keyword=${q}`,
+  웨이브: (q) => `https://www.wavve.com/search?searchWord=${q}`,
+  왓챠: (q) => `https://watcha.com/search?query=${q}`,
+  "디즈니+": (q) => `https://www.disneyplus.com/search?q=${q}`,
+  쿠팡플레이: () => "https://www.coupangplay.com/",
+  "Apple TV": (q) => `https://tv.apple.com/kr/search?term=${q}`,
+  "Apple TV+": (q) => `https://tv.apple.com/kr/search?term=${q}`,
+  "구글 플레이": (q) => `https://play.google.com/store/search?q=${q}&c=movies`,
+  "프라임 비디오": (q) => `https://www.primevideo.com/search?phrase=${q}`,
+  라프텔: (q) => `https://laftel.net/search?keyword=${q}`,
+  "네이버 시리즈온": () => "https://serieson.naver.com/",
+};
+
+function providerLink(name, title, fallback) {
+  const make = PROVIDER_SEARCH[name];
+  return make ? make(encodeURIComponent(title || "")) : fallback || "#";
+}
+
+async function renderProviders(media, tmdbId, title = "") {
   const box = document.querySelector(".save-box");
   if (!box) return;
 
@@ -314,7 +339,7 @@ async function renderProviders(media, tmdbId) {
       <ul class="provider-list">
         ${list.map((p) => `
           <li>
-            <a class="provider-item" href="${esc(data.link || "#")}" target="_blank" rel="noopener">
+            <a class="provider-item" href="${esc(providerLink(p.provider_name, title, data.link))}" target="_blank" rel="noopener">
               <span class="provider-logo">
                 ${p.logo_path ? `<img src="${IMG}/w92${p.logo_path}" alt="">` : esc(p.provider_name.slice(0, 1))}
               </span>
@@ -478,9 +503,12 @@ async function renderExplore({ media, cast, crew }) {
     ...r,
     genres,
     // 원작 작가 → 웹툰 작가 페이지 / 배우·감독 → 영화·드라마 제작진 페이지
+    // 원작 작가 → 웹툰 작가 페이지 / 배우 → 배우 상세 / 감독 → 영화·드라마 제작진 페이지
     href: r.isAuthor
       ? `writer.html?${new URLSearchParams({ writer: r.name })}`
-      : `writer.html?person=${r.person.id}`,
+      : r.role === "배우"
+        ? `actor.html?id=${r.person.id}`
+        : `writer.html?person=${r.person.id}`,
   })).join("");
 
   exploreSection.style.display = "";
@@ -524,6 +552,15 @@ function isSameWork(itemTitle, title) {
 // 만화규장각 작가 칸에 이 이름이 정확히 있는지 ("조석" ≠ "조석호")
 function hasName(item, name) {
   return `${item.sntncWritrNm || ""} ${item.pictrWritrNm || ""}`.split(/[\s,·/()]+/).includes(name);
+}
+
+// 원작자와 같은 사람인지 (실명 ↔ 필명)
+// - TMDB 는 실명("조광진"), 만화규장각은 필명("광진")으로 적힌 경우가 있음
+// - 정확히 같거나, 실명에서 성(한 글자)만 뺀 이름이면 같은 사람으로 봄
+function isSameAuthor(item, name) {
+  if (hasName(item, name)) return true;
+  const names = `${item.sntncWritrNm || ""} ${item.pictrWritrNm || ""}`.split(/[\s,·/()]+/).filter(Boolean);
+  return names.some((n) => n.length >= 2 && name.length === n.length + 1 && name.endsWith(n));
 }
 
 // TMDB 원작자 이름 → 한글 이름 ("Yoon Tae-ho" → "윤태호")
@@ -579,7 +616,7 @@ async function findOriginal({ media, title, crew }) {
     const matched = items.filter(
       (item) =>
         isSameWork(item.prdctNm || item.title, t) &&
-        (authorNames.length === 0 || authorNames.some((n) => hasName(item, n)))
+        (authorNames.length === 0 || authorNames.some((n) => isSameAuthor(item, n)))
     );
     if (matched.length) return toOriginal(matched, t, authorNames);
   }
@@ -711,7 +748,7 @@ async function renderMovie() {
     genres: movie.genres.map((g) => g.name),
     href: `detail.html?type=movie&id=${id}`,
   });
-  renderProviders("movie", id);
+  renderProviders("movie", id, movie.title);
 
   // 개봉일, 제작사, 감독
   document.getElementById("release").textContent = movie.release_date;
@@ -814,7 +851,7 @@ async function renderTv() {
     genres: (tv.genres || []).map((g) => g.name),
     href: `detail.html?type=tv&id=${id}`,
   });
-  renderProviders("tv", id);
+  renderProviders("tv", id, tv.name);
 
   // 방영 기간: "2014.10.17 ~ 2014.12.20" / 아직 방영 중이면 "2025.07.16 ~ 방영 중"
   setLabel("release", "방영");
@@ -1150,7 +1187,7 @@ async function renderWebtoon() {
         role: `${a.media === "movie" ? "영화" : "드라마"} ${t.role}`,
         name: await koreanNameOf(t.person),
         person: t.person,
-        href: `writer.html?person=${t.person.id}`,
+        href: t.role === "배우" ? `actor.html?id=${t.person.id}` : `writer.html?person=${t.person.id}`,
         works,
         genres,
       }));
