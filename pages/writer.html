@@ -1,0 +1,125 @@
+<!doctype html>
+<!--
+  작가 상세 페이지 (pages/writer.html)
+  - 진입: 작품 상세(detail.html)의 원작 정보에서 작가 클릭 → writer.html?writer=윤태호
+  - 지금 단계: 작가 프로필(사진, 소개글)만 TMDB 에서 불러와 채움
+  - 대표 작품 / 전체 작품은 자리만 만들어 두고 다음 단계에서 연결
+-->
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- 작가 이름을 읽으면 writer.js 가 "StoLink - 윤태호" 로 바꿈 -->
+    <title>StoLink - 작가 상세</title>
+
+    <!-- search.html 과 같은 순서: 페이지 스타일 먼저, 공통 헤더 스타일을 나중에
+         (나중에 불러온 header.css 가 우선 적용되어 헤더 모양이 다른 페이지와 같아짐) -->
+    <link rel="stylesheet" href="../css/writer.css" />
+    <link rel="stylesheet" href="../css/common/header.css" />
+  </head>
+
+  <body>
+    <!-- =====================================================
+         공통 헤더 (detail.html, search.html 과 동일)
+    ====================================================== -->
+    <header class="site-header">
+      <a href="/index.html" class="logo"><img src="../assets/logo/logo.svg" alt="" /></a>
+      <form class="search-bar" action="search.html">
+        <input type="text" name="q" />
+      </form>
+      <nav class="user-menu">
+        <a href="/pages/login.html" class="login-link">로그인</a>
+        <a href="/pages/signup.html" class="signup-btn">회원가입</a>
+      </nav>
+    </header>
+
+    <main class="writer-page">
+      <!-- 이전 페이지(보통 작품 상세)로 돌아가기 - writer.js 가 뒤로 가기로 동작시킴 -->
+      <a href="search.html" class="back-link" id="back-link">이전 페이지로</a>
+
+      <!-- '준비 중' 배너: 만화규장각 API 오류 / 인증키 승인 전이면 writer.js 가 hidden 을 지움 -->
+      <div class="notice-banner" id="notice-banner" hidden>
+        <strong>준비 중</strong>
+        <span>만화규장각 연동을 준비하고 있어요. 지금은 예시 데이터로 보여드려요.</span>
+      </div>
+
+      <!-- =====================================================
+           1. 작가 프로필
+           - 처음엔 is-loading (회색 막대가 깜빡임)
+           - writer.js 가 TMDB 정보로 채운 뒤 is-loading 을 지움
+      ====================================================== -->
+      <section class="writer-profile is-loading" id="writer-profile">
+        <!-- 프로필 사진 자리
+             - 사진이 있으면 <img>
+             - 없으면 회색 사각형 + 사람 모양 기본 이미지 -->
+        <div class="writer-photo" id="writer-photo"></div>
+
+        <div class="writer-info">
+          <!-- 웹툰 작가 / 감독 / 각본가 등 -->
+          <span class="writer-badge" id="writer-badge">작가</span>
+
+          <!-- 작가 이름 (주소의 ?writer= 값) -->
+          <h1 class="writer-name" id="writer-name">&nbsp;</h1>
+
+          <!-- 생일, 출생지 (TMDB 에 있을 때만 보임) -->
+          <dl class="writer-meta" id="writer-meta"></dl>
+
+          <!-- 소개글: 길면 4줄까지만, '더보기'로 펼침 -->
+          <p class="writer-bio" id="writer-bio">&nbsp;</p>
+          <button type="button" class="more-btn" id="more-btn" hidden>더보기</button>
+
+          <!-- 정보 출처 (TMDB 이용 시 출처 표시) -->
+          <p class="writer-source" id="writer-source"></p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           2. 대표 작품 = 영화·드라마로 만들어진 웹툰
+           - 카드 하나 = [웹툰 표지 + 이름] → [영화/드라마 포스터 + 이름]
+           - 웹툰 표지: 만화규장각 imageDownloadUrl / 포스터: TMDB poster_path
+           - 웹툰, 영화·드라마를 각각 누르면 그 작품의 detail.html 로 이동
+           - 내용은 writer.js 가 채움 (처음엔 회색 카드 2개가 깜빡임)
+      ====================================================== -->
+      <section class="writer-section">
+        <h2>대표 작품</h2>
+        <ul class="rep-list" id="rep-list">
+          <li class="rep-card skeleton"></li>
+          <li class="rep-card skeleton"></li>
+        </ul>
+      </section>
+
+      <!-- =====================================================
+           3. 전체 작품 목록
+           - 오른쪽 위 필터: 전체 / 실사화된 작품
+           - 표: 작품 / 연재 플랫폼 / 장르 / (연재 시작) / 실사화 정보
+             · 작품 이름 클릭 → 웹툰 detail
+             · 실사화 배지(영화/드라마) 클릭 → 그 영화·드라마 detail
+           - 표의 머리글과 내용은 writer.js 가 채움
+      ====================================================== -->
+      <section class="writer-section">
+        <div class="works-header">
+          <h2>전체 작품 목록</h2>
+
+          <!-- 필터 토글: 선택된 버튼에 is-active -->
+          <div class="filter-toggle" role="group" aria-label="작품 필터">
+            <button type="button" class="filter-btn is-active" data-filter="all">전체</button>
+            <button type="button" class="filter-btn" data-filter="adapted">실사화된 작품</button>
+          </div>
+        </div>
+
+        <div class="works-table-wrap">
+          <table class="works-table">
+            <thead id="works-head"></thead>
+            <tbody id="works-body">
+              <tr><td class="works-message" colspan="10">작품 목록을 불러오는 중이에요…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- 다른 페이지와 같은 방식: js/pages/ 에 페이지 스크립트, js/common/ 에 헤더 스크립트 -->
+    <script type="module" src="../js/pages/writer.js"></script>
+    <script type="module" src="../js/common/header.js"></script>
+  </body>
+</html>
