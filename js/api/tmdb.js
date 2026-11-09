@@ -33,3 +33,29 @@ export async function searchMovie(query) {
         console.log("검색 에러", e)
     }
 }
+
+export async function getMovieDetail(id) {
+    const url = `${BASE_URL}/movie/${id}?api_key=${TMDB_API_KEY}&language=ko-KR&append_to_response=credits`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Http 통신 오류 ${response.status}`);
+        }
+        return await response.json();
+    } catch (e) {
+        console.log("TMDB 상세 에러", e);
+    }
+}
+
+export async function getPersonCredits(personId) {
+    const url = `${BASE_URL}/person/${personId}/combined_credits?api_key=${TMDB_API_KEY}&language=ko-KR`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Http 통신 오류 ${response.status}`);
+        return await response.json();
+    } catch (error) {
+        console.log("TMDB 인물 작품 에러", error);
+    }
+}
