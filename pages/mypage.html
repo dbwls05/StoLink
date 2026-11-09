@@ -25,39 +25,54 @@
     </header>
 
     <main class="mypage">
-      <section class="profile">
+      <aside class="profile">
         <div class="profile-image"></div>
+        <h2 class="nickname">닉네임</h2>
+        <p class="email">useremail@gmail.com</p>
+        <span class="provider-badge" hidden></span>
+        <button type="button" class="edit-button">프로필 수정</button>
+        <button type="button" class="logout-button">로그아웃</button>
+      </aside>
 
-        <div class="profile-info">
-          <h2 class="nickname">닉네임</h2>
-          <h2 class="email">useremail@gmail.com</h2>
-        </div>
+      <div class="dashboard">
+        <section class="block">
+          <h3 class="block-title">시청 상태별 통계</h3>
+          <div class="stats">
+            <div class="stat-card">
+              <p class="stat-label">저장한 콘텐츠</p>
+              <p class="stat-number" data-stat="total">0</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">보고싶음</p>
+              <p class="stat-number" data-stat="want">0</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">보는중</p>
+              <p class="stat-number" data-stat="watching">0</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-label">시청함</p>
+              <p class="stat-number" data-stat="done">0</p>
+            </div>
+          </div>
+        </section>
 
-        <div class="profile-button">
-          <button type="button" class="edit-button">프로필 수정</button>
-          <button type="button" class="logout-button">로그아웃</button>
-        </div>
-      </section>
+        <section class="block">
+          <h3 class="block-title">콘텐츠 이용 현황</h3>
+          <div class="usage">
+            <ul class="usage-list"></ul>
+            <p class="usage-note"></p>
+          </div>
+        </section>
 
-      <section class="stats">
-        <div class="stat-card">
-          <p class="stat-number">00</p>
-          <p class="stat-label">총 저장한 콘텐츠</p>
-        </div>
-
-        <div class="stat-card">
-          <p class="stat-number">00</p>
-          <p class="stat-label">보는중</p>
-        </div>
-
-        <div class="stat-card">
-          <p class="stat-number">00</p>
-          <p class="stat-label">시청완료</p>
-        </div>
-      </section>
-
-      <!-- 최근 저장한 콘텐츠 -->
-      <section></section>
+        <section class="block">
+          <div class="block-head">
+            <h3 class="block-title">최근 저장한 콘텐츠</h3>
+            <a href="library.html" class="more-link">보관함 전체 보기</a>
+          </div>
+          <div class="recent-list"></div>
+        </section>
+      </div>
     </main>
 
     <script type="module" src="../js/common/header.js"></script>
