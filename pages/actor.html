@@ -1,12 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>배우 상세 페이지</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<!doctype html>
+<!--
+  배우 상세 페이지 (pages/actor.html)
+  - 주소: actor.html?id=TMDB인물번호  (작품 상세의 출연진 카드를 누르면 이동)
+  - 이 HTML 은 빈 틀만 가지고 있고, 내용은 ../js/pages/actor.js 가 TMDB 에서 불러와 채움
+-->
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StoLink - 배우 상세</title>
+    <!-- detail.html 과 같은 순서: 공통 헤더 → 이 페이지 스타일 -->
+    <link rel="stylesheet" href="../css/common/header.css" />
+    <link rel="stylesheet" href="../css/actor.css" />
   </head>
-<body>
-    
-</body>
+
+  <body>
+    <!-- 헤더 (다른 페이지와 동일) -->
+    <header class="site-header">
+      <a href="/index.html" class="logo"
+        ><img src="../assets/logo/logo.svg" alt=""
+      /></a>
+      <form class="search-bar" action="search.html">
+        <input type="text" name="q" />
+      </form>
+      <nav class="user-menu">
+        <a href="/pages/login.html" class="login-link">로그인</a>
+        <a href="/pages/signup.html" class="signup-btn">회원가입</a>
+      </nav>
+    </header>
+
+    <main class="actor-page">
+      <!-- 이전 페이지로 (보통 작품 상세) - actor.js 가 뒤로 가기로 동작시킴 -->
+      <a href="search.html" class="back-link" id="back-link">이전 페이지로</a>
+
+      <!-- =====================================================
+             배우 프로필
+             - 처음엔 is-loading (회색 막대가 깜빡임)
+             - actor.js 가 사진 / 직업 / 이름 / 출생 / 데뷔 / 출연작 수를 채움
+        ====================================================== -->
+      <section class="actor-info is-loading" id="actor-info">
+        <!-- 프로필 사진 (없으면 회색 사람 모양 기본 이미지) -->
+        <div class="actor-image" id="actor-image"></div>
+
+        <div class="actor-detail">
+          <span class="actor-job" id="actor-job">배우</span>
+          <h1 id="actor-name">&nbsp;</h1>
+
+          <dl class="actor-meta">
+            <div>
+              <dt>출생</dt>
+              <dd id="actor-birth">-</dd>
+            </div>
+            <div>
+              <dt>데뷔</dt>
+              <dd id="actor-debut">-</dd>
+            </div>
+            <div>
+              <dt>출연작</dt>
+              <dd id="actor-count">-</dd>
+            </div>
+          </dl>
+
+          <p class="actor-source" id="actor-source"></p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+             대표 출연작 (최대 4개)
+             - 카드: 포스터 + 영화/드라마 표시 + 제목 + 개봉·방영일 + "OO 역"
+             - 카드를 누르면 그 작품의 상세 페이지(detail.html)로 이동
+        ====================================================== -->
+      <section class="filmography">
+        <h2>대표 출연작</h2>
+        <div class="film-list" id="film-list">
+          <!-- 불러오는 동안 보이는 회색 카드 -->
+          <div class="work-card skeleton"></div>
+          <div class="work-card skeleton"></div>
+          <div class="work-card skeleton"></div>
+          <div class="work-card skeleton"></div>
+        </div>
+      </section>
+
+      <!-- =====================================================
+             전체 필모그래피
+             - 탭: 전체 / 영화 / 드라마
+             - 한 줄 = 한 작품 (최신순): 연도 · 작품명 · "OO 역" · 영화/드라마 · (웹툰 원작)
+             - 줄을 누르면 그 작품의 상세 페이지(detail.html)로 이동
+        ====================================================== -->
+      <section class="all-filmography">
+        <div class="all-film-head">
+          <h2>전체 필모그래피</h2>
+          <div class="film-tabs" id="film-tabs">
+            <button type="button" class="film-tab is-active" data-filter="all">
+              전체
+            </button>
+            <button type="button" class="film-tab" data-filter="movie">
+              영화
+            </button>
+            <button type="button" class="film-tab" data-filter="tv">
+              드라마
+            </button>
+          </div>
+        </div>
+        <ul class="film-rows" id="year-list">
+          <li class="film-empty">불러오는 중...</li>
+        </ul>
+      </section>
+    </main>
+
+    <script type="module" src="../js/pages/actor.js"></script>
+    <script type="module" src="../js/common/header.js"></script>
+  </body>
 </html>
