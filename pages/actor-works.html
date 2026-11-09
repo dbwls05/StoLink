@@ -7,23 +7,23 @@
     <title>배우 출연작</title>
 
     <link rel="stylesheet" href="../css/actor-works.css" />
+    <link rel="stylesheet" href="../css/common/variables.css" />
   </head>
 
   <body>
     <!-- 헤더 -->
     <header>
-      <a href="../index.html" class="logo"> StoLink </a>
-
-      <form class="search-box" action="search.html" method="GET">
-        <input type="text" name="query" placeholder="검색어 입력" />
-
-        <button type="submit">검색</button>
+      <header class="site-header navy-section">
+      <a href="/index.html" class="logo"
+        ><img src="../assets/logo/logo.svg" alt=""
+      /></a>
+      <form class="search-bar" action="search.html">
+        <input type="text" name="q" />
       </form>
-
-      <div class="user-menu">
-        <a href="signup.html">회원가입</a>
-        <a href="login.html">로그인</a>
-      </div>
+      <nav class="user-menu">
+        <a href="/pages/login.html" class="login-link">로그인</a>
+        <a href="/pages/signup.html" class="signup-btn">회원가입</a>
+      </nav>
     </header>
 
     <main>

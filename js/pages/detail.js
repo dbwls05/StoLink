@@ -18,6 +18,7 @@
 import * as tmdb from "../api/tmdb.js";
 import * as kmas from "../api/kmas.js";
 import * as adaptation from "../api/adaptation.js";
+import { getCurrentUser } from "../supabase/auth.js";
 
 // 내 보관함 공통 모듈 (없어도 페이지가 멈추지 않게 '있으면 쓰는' 방식)
 const library = await import("../common/library.js").catch(() => {
@@ -36,9 +37,17 @@ const id = params.get("id");
 
 // API 글자를 HTML 에 넣기 전에 특수문자 바꾸기
 function esc(text) {
-  return String(text ?? "").replace(/[&<>"']/g, (ch) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  })[ch]);
+  return String(text ?? "").replace(
+    /[&<>"']/g,
+    (ch) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[ch],
+  );
 }
 
 // 이름 목록 → "가, 나" (없으면 "-")
@@ -62,16 +71,20 @@ function setLabel(ddId, label) {
 // people: [{ id, name, profile_path, character }]
 function renderCast(people) {
   document.getElementById("cast-list").innerHTML = people.length
-    ? people.map((a) => `
+    ? people
+        .map(
+          (a) => `
     <li class="cast-card">
-      <a href="person-detail.html?id=${a.id}">
+      <a href="actor-works.html?id=${a.id}">
         <div class="cast-photo">
           ${a.profile_path ? `<img src="${IMG}/w185${a.profile_path}" alt="${esc(a.name)}">` : ""}
         </div>
         <p class="cast-name">${esc(a.name)}</p>
         <p class="cast-role">${a.character ? `${esc(a.character)} 역` : "출연"}</p>
       </a>
-    </li>`).join("")
+    </li>`,
+        )
+        .join("")
     : `<li class="cast-empty">출연진 정보가 없습니다.</li>`;
 }
 
@@ -116,7 +129,12 @@ function pickCrew(crew, max = 8) {
       if (rank === -1) return; // 목록에 없는 직무(조명, 의상 등)는 제외
 
       if (!people.has(member.id)) {
-        people.set(member.id, { ...member, roles: [], rank, isOriginal: false });
+        people.set(member.id, {
+          ...member,
+          roles: [],
+          rank,
+          isOriginal: false,
+        });
       }
       const person = people.get(member.id);
       const label = CREW_JOBS[rank][1];
@@ -141,15 +159,18 @@ async function renderCrew(crew) {
 
   // 원작자는 한글 이름으로 표시·이동 ("Yoon Tae-ho" → "윤태호")
   await Promise.all(
-    people.filter((p) => p.isOriginal).map(async (p) => (p.koreanName = await koreanNameOf(p)))
+    people
+      .filter((p) => p.isOriginal)
+      .map(async (p) => (p.koreanName = await koreanNameOf(p))),
   );
 
-  list.innerHTML = people.map((p) => {
-    const name = p.koreanName || p.name;
-    const href = p.isOriginal
-      ? `writer.html?${new URLSearchParams({ writer: name })}` // 원작자 → 웹툰 작가 페이지
-      : `writer.html?person=${p.id}`;                         // 감독 등 → 영화·드라마 제작진 페이지
-    return `
+  list.innerHTML = people
+    .map((p) => {
+      const name = p.koreanName || p.name;
+      const href = p.isOriginal
+        ? `writer.html?${new URLSearchParams({ writer: name })}` // 원작자 → 웹툰 작가 페이지
+        : `writer.html?person=${p.id}`; // 감독 등 → 영화·드라마 제작진 페이지
+      return `
     <li class="cast-card">
       <a href="${href}">
         <div class="cast-photo">
@@ -159,13 +180,14 @@ async function renderCrew(crew) {
         <p class="cast-role">${p.roles.join(" · ")}</p>
       </a>
     </li>`;
-  }).join("");
+    })
+    .join("");
 }
 
 /* ---------------------------------------------------------
    내 보관함 저장 (영화·드라마·웹툰 공통)
    - 오른쪽 '내 보관함' 상자의 상태 선택 + 저장 버튼
-   - 저장 내용은 js/common/library.js 가 localStorage 에 보관 → library.html 에서 읽음
+   - 저장 내용은 js/common/library.js 가 Supabase(saved_contents 테이블)에 보관 → 마이페이지에서 읽음
    - 버튼 동작
        저장 안 됨 → [♡ 보관함에 저장]  누르면 선택한 상태로 저장
        저장 됨   → [♥ 보관함에 저장됨] 누르면 보관함에서 빼기
@@ -180,7 +202,7 @@ const HEART = (filled) => `
   </svg>`;
 
 // work: { type, id, title, writer, poster, year, genres, href }
-function setupSaveBox(work) {
+async function setupSaveBox(work) {
   const box = document.querySelector(".save-box");
   const select = document.getElementById("status");
   const button = box?.querySelector(".save-btn");
@@ -194,17 +216,20 @@ function setupSaveBox(work) {
     return;
   }
 
+  await library.loadLibrary(); // 서버에서 내 보관함 가져오기 (로그인 안 했으면 빈 목록)
+
   const key = library.makeKey(work);
   const defaultNote = note?.innerHTML || "";
 
   // 웹툰은 '시청'이 아니라 '감상'
   const label = box.querySelector('label[for="status"]');
-  if (label) label.textContent = work.type === "webtoon" ? "감상 상태" : "시청 상태";
+  if (label)
+    label.textContent = work.type === "webtoon" ? "감상 상태" : "시청 상태";
 
   // 상태 선택 상자 다시 만들기: 보고싶음 / 보는 중 / 다 봄 (값은 want / watching / done)
-  select.innerHTML = library.STATUS_LIST
-    .map((code) => `<option value="${code}">${library.STATUS_LABEL[code]}</option>`)
-    .join("");
+  select.innerHTML = library.STATUS_LIST.map(
+    (code) => `<option value="${code}">${library.STATUS_LABEL[code]}</option>`,
+  ).join("");
 
   // 안내 글자를 잠깐 바꿨다가 원래대로
   let noteTimer;
@@ -219,27 +244,42 @@ function setupSaveBox(work) {
   const refresh = () => {
     const saved = library.getItem(key);
     if (saved) select.value = saved.status;
-    button.innerHTML = saved ? `${HEART(true)}보관함에 저장됨` : `${HEART(false)}보관함에 저장`;
+    button.innerHTML = saved
+      ? `${HEART(true)}보관함에 저장됨`
+      : `${HEART(false)}보관함에 저장`;
     button.setAttribute("aria-pressed", String(!!saved));
     button.title = saved ? "한 번 더 누르면 보관함에서 빠져요" : "";
   };
 
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
+    button.disabled = true; // 서버 응답을 기다리는 동안 중복 클릭 막기
     if (library.getItem(key)) {
-      library.removeItem(key);
-      flash("보관함에서 뺐어요.");
+      const removed = await library.removeItem(key);
+      flash(removed ? "보관함에서 뺐어요." : "보관함에서 빼지 못했어요. 다시 시도해 주세요.");
+    } else if (!(await getCurrentUser())) {
+      flash("로그인하면 보관함에 저장할 수 있어요.");
     } else {
-      const saved = library.saveItem(work, select.value);
-      flash(saved ? `'${library.STATUS_LABEL[select.value]}'(으)로 보관함에 저장했어요.` : "저장하지 못했어요. 브라우저 저장 공간을 확인해 주세요.");
+      const saved = await library.saveItem(work, select.value);
+      flash(
+        saved
+          ? `'${library.STATUS_LABEL[select.value]}'(으)로 보관함에 저장했어요.`
+          : "저장하지 못했어요. 잠시 후 다시 시도해 주세요.",
+      );
     }
+    button.disabled = false;
     refresh();
   });
 
   // 저장된 작품이면 상태를 바꿀 때 바로 반영
-  select.addEventListener("change", () => {
+  select.addEventListener("change", async () => {
     if (library.getItem(key)) {
-      library.updateStatus(key, select.value);
-      flash(`상태를 '${library.STATUS_LABEL[select.value]}'(으)로 바꿨어요.`);
+      const updated = await library.updateStatus(key, select.value);
+      flash(
+        updated
+          ? `상태를 '${library.STATUS_LABEL[select.value]}'(으)로 바꿨어요.`
+          : "상태를 바꾸지 못했어요. 다시 시도해 주세요.",
+      );
+      if (!updated) refresh();
     }
   });
 
@@ -287,9 +327,10 @@ async function renderProviders(media, tmdbId) {
   const box = document.querySelector(".save-box");
   if (!box) return;
 
-  const data = media === "movie"
-    ? await tmdb.getWatchProviders?.(tmdbId)
-    : await tmdb.getTvWatchProviders?.(tmdbId);
+  const data =
+    media === "movie"
+      ? await tmdb.getWatchProviders?.(tmdbId)
+      : await tmdb.getTvWatchProviders?.(tmdbId);
   if (!data) return;
 
   // 서비스별로 묶기: 티빙 → ["구독"], 웨이브 → ["구독", "대여"]
@@ -299,7 +340,8 @@ async function renderProviders(media, tmdbId) {
   PROVIDER_TYPES.forEach(([field, label]) => {
     (data[field] || []).forEach((p) => {
       const name = providerName(p.provider_name);
-      if (!providers.has(name)) providers.set(name, { ...p, provider_name: name, types: [] });
+      if (!providers.has(name))
+        providers.set(name, { ...p, provider_name: name, types: [] });
       const saved = providers.get(name);
       if (!saved.types.includes(label)) saved.types.push(label);
     });
@@ -308,11 +350,15 @@ async function renderProviders(media, tmdbId) {
 
   const list = [...providers.values()].slice(0, 6); // 너무 길어지지 않게 6개까지
 
-  box.insertAdjacentHTML("beforeend", `
+  box.insertAdjacentHTML(
+    "beforeend",
+    `
     <div class="provider-section">
       <h3 class="provider-title">볼 수 있는 곳</h3>
       <ul class="provider-list">
-        ${list.map((p) => `
+        ${list
+          .map(
+            (p) => `
           <li>
             <a class="provider-item" href="${esc(data.link || "#")}" target="_blank" rel="noopener">
               <span class="provider-logo">
@@ -324,10 +370,13 @@ async function renderProviders(media, tmdbId) {
               </span>
               <span class="provider-arrow" aria-hidden="true">↗</span>
             </a>
-          </li>`).join("")}
+          </li>`,
+          )
+          .join("")}
       </ul>
       <p class="provider-source">TMDB · JustWatch 제공 · 한국 기준</p>
-    </div>`);
+    </div>`,
+  );
 }
 
 /* ---------------------------------------------------------
@@ -365,7 +414,10 @@ async function loadGenreNames() {
     tmdb.getGenreList?.("tv") || [],
   ]);
   genreNames = new Map(
-    [...(movieGenres || []), ...(tvGenres || [])].map((g) => [g.id, GENRE_KO[g.name] || g.name])
+    [...(movieGenres || []), ...(tvGenres || [])].map((g) => [
+      g.id,
+      GENRE_KO[g.name] || g.name,
+    ]),
   );
   return genreNames;
 }
@@ -382,7 +434,11 @@ async function otherWorksOf(personId, current) {
     if (media !== "movie" && media !== "tv") return;
     if (c.adult) return;
     if (media === current.media && String(c.id) === String(current.id)) return; // 지금 작품 제외
-    if (media === "tv" && (c.genre_ids || []).some((g) => EXCLUDED_TV_GENRES.includes(g))) return;
+    if (
+      media === "tv" &&
+      (c.genre_ids || []).some((g) => EXCLUDED_TV_GENRES.includes(g))
+    )
+      return;
     if (/^(self|himself|herself|본인)/i.test(c.character || "")) return; // 본인 출연 제외
     works.set(`${media}-${c.id}`, c);
   });
@@ -398,14 +454,21 @@ function exploreBoxHtml({ role, name, person, href, works, genres }) {
     ? `<img src="${IMG}/w185${person.profile_path}" alt="" style="display:block; width:100%; height:100%; object-fit:cover;">`
     : "";
 
-  const items = works.map((w) => {
-    const media = w.media_type;
-    const workTitle = w.title || w.name;
-    // "영화 · 범죄, 드라마" (장르는 앞 2개까지)
-    const genreText = (w.genre_ids || []).map((g) => genres.get(g)).filter(Boolean).slice(0, 2).join(", ");
-    const meta = [media === "movie" ? "영화" : "드라마", genreText].filter(Boolean).join(" · ");
+  const items = works
+    .map((w) => {
+      const media = w.media_type;
+      const workTitle = w.title || w.name;
+      // "영화 · 범죄, 드라마" (장르는 앞 2개까지)
+      const genreText = (w.genre_ids || [])
+        .map((g) => genres.get(g))
+        .filter(Boolean)
+        .slice(0, 2)
+        .join(", ");
+      const meta = [media === "movie" ? "영화" : "드라마", genreText]
+        .filter(Boolean)
+        .join(" · ");
 
-    return `
+      return `
       <li>
         <a href="detail.html?type=${media}&id=${w.id}" style="color:inherit; text-decoration:none;">
           <div class="work-thumb" style="overflow:hidden;">
@@ -415,7 +478,8 @@ function exploreBoxHtml({ role, name, person, href, works, genres }) {
           <small style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(meta)}</small>
         </a>
       </li>`;
-  }).join("");
+    })
+    .join("");
 
   return `
     <div class="explore-box">
@@ -436,7 +500,9 @@ async function renderExplore({ media, cast, crew }) {
   // 1) 누구의 다른 작품을 보여줄지 (박스 3개)
   //    - 원작 작가가 있으면 : 주연 배우 1명 + 원작 작가 + 감독
   //    - 원작 작가가 없으면 : 주연 배우 2명 + 감독
-  const author = crew.find((c) => jobsOf(c).some((job) => ORIGINAL_JOBS.includes(job)));
+  const author = crew.find((c) =>
+    jobsOf(c).some((job) => ORIGINAL_JOBS.includes(job)),
+  );
   const director = crew.find((c) => jobsOf(c).includes("Director"));
   const actor = (person) => ({ role: "배우", person, isAuthor: false });
 
@@ -449,7 +515,8 @@ async function renderExplore({ media, cast, crew }) {
   const backups = cast.slice(author ? 1 : 2, 6).map(actor);
 
   const seen = new Set(); // 같은 사람이 두 번 나오지 않게 (예: 감독 = 원작자)
-  const isNew = ({ person }) => person && !seen.has(person.id) && seen.add(person.id);
+  const isNew = ({ person }) =>
+    person && !seen.has(person.id) && seen.add(person.id);
   const targets = primary.filter(isNew);
   const spares = backups.filter(isNew);
 
@@ -463,7 +530,10 @@ async function renderExplore({ media, cast, crew }) {
   });
 
   // 2) 장르 이름 + 각 사람의 다른 작품을 동시에 불러옴
-  const [genres, ...results] = await Promise.all([loadGenreNames(), ...targets.map(loadBox)]);
+  const [genres, ...results] = await Promise.all([
+    loadGenreNames(),
+    ...targets.map(loadBox),
+  ]);
 
   // 3) 다른 작품이 있는 사람만 박스로, 3개가 안 되면 다음 배우로 채움
   const boxes = results.filter((r) => r.works.length > 0);
@@ -474,14 +544,18 @@ async function renderExplore({ media, cast, crew }) {
   }
   if (boxes.length === 0) return; // 아무도 없으면 섹션 숨긴 채로
 
-  grid.innerHTML = boxes.map((r) => exploreBoxHtml({
-    ...r,
-    genres,
-    // 원작 작가 → 웹툰 작가 페이지 / 배우·감독 → 영화·드라마 제작진 페이지
-    href: r.isAuthor
-      ? `writer.html?${new URLSearchParams({ writer: r.name })}`
-      : `writer.html?person=${r.person.id}`,
-  })).join("");
+  grid.innerHTML = boxes
+    .map((r) =>
+      exploreBoxHtml({
+        ...r,
+        genres,
+        // 원작 작가 → 웹툰 작가 페이지 / 배우·감독 → 영화·드라마 제작진 페이지
+        href: r.isAuthor
+          ? `writer.html?${new URLSearchParams({ writer: r.name })}`
+          : `writer.html?person=${r.person.id}`,
+      }),
+    )
+    .join("");
 
   exploreSection.style.display = "";
 }
@@ -491,7 +565,14 @@ async function renderExplore({ media, cast, crew }) {
 --------------------------------------------------------- */
 
 // 원작으로 보는 TMDB 직무 (웹툰·만화·소설 원작자)
-const ORIGINAL_JOBS = ["Comic Book", "Graphic Novel", "Novel", "Original Story", "Original Concept", "Characters"];
+const ORIGINAL_JOBS = [
+  "Comic Book",
+  "Graphic Novel",
+  "Novel",
+  "Original Story",
+  "Original Concept",
+  "Characters",
+];
 
 // 원작 섹션은 처음엔 숨김 (HTML 에 적혀 있는 예시 '미생'이 잠깐 보이지 않게)
 const originSection = document.querySelector(".origin-section");
@@ -523,21 +604,27 @@ function isSameWork(itemTitle, title) {
 
 // 만화규장각 작가 칸에 이 이름이 정확히 있는지 ("조석" ≠ "조석호")
 function hasName(item, name) {
-  return `${item.sntncWritrNm || ""} ${item.pictrWritrNm || ""}`.split(/[\s,·/()]+/).includes(name);
+  return `${item.sntncWritrNm || ""} ${item.pictrWritrNm || ""}`
+    .split(/[\s,·/()]+/)
+    .includes(name);
 }
 
 // TMDB 원작자 이름 → 한글 이름 ("Yoon Tae-ho" → "윤태호")
 async function koreanNameOf(person) {
   if (/[가-힣]/.test(person.name)) return person.name;
   const detail = await tmdb.getPersonDetail?.(person.id);
-  return (detail?.also_known_as || []).find((n) => /[가-힣]/.test(n)) || person.name;
+  return (
+    (detail?.also_known_as || []).find((n) => /[가-힣]/.test(n)) || person.name
+  );
 }
 
 // 같은 작품으로 묶인 만화규장각 항목들 → 화면에 쓸 원작 정보
 function toOriginal(matched, fallbackTitle, authorNames) {
   // 연재 플랫폼이 있는 항목 = 웹툰 기록 → 우선 사용 (없으면 단행본)
   const best = matched.find((item) => item.pltfomCdNm) || matched[0];
-  const cover = best.imageDownloadUrl || matched.find((item) => item.imageDownloadUrl)?.imageDownloadUrl;
+  const cover =
+    best.imageDownloadUrl ||
+    matched.find((item) => item.imageDownloadUrl)?.imageDownloadUrl;
   const writer =
     authorNames.find((n) => hasName(best, n)) ||
     (best.sntncWritrNm || best.pictrWritrNm || "").split(/[\s,]+/)[0];
@@ -556,10 +643,14 @@ function toOriginal(matched, fallbackTitle, authorNames) {
 // - 결과 : { title, writer, platform, image, label } 또는 null(원작 없음)
 async function findOriginal({ media, title, crew }) {
   // 1) TMDB 원작자
-  const authors = crew.filter((c) =>
-    ORIGINAL_JOBS.includes(c.job) || (c.jobs || []).some((j) => ORIGINAL_JOBS.includes(j.job))
+  const authors = crew.filter(
+    (c) =>
+      ORIGINAL_JOBS.includes(c.job) ||
+      (c.jobs || []).some((j) => ORIGINAL_JOBS.includes(j.job)),
   );
-  const uniqueAuthors = [...new Map(authors.map((a) => [a.id, a])).values()].slice(0, 2);
+  const uniqueAuthors = [
+    ...new Map(authors.map((a) => [a.id, a])).values(),
+  ].slice(0, 2);
   const authorNames = await Promise.all(uniqueAuthors.map(koreanNameOf));
 
   // 2) 직접 연결해 둔 원작 (예: Moon Man → 문유)
@@ -579,7 +670,7 @@ async function findOriginal({ media, title, crew }) {
     const matched = items.filter(
       (item) =>
         isSameWork(item.prdctNm || item.title, t) &&
-        (authorNames.length === 0 || authorNames.some((n) => hasName(item, n)))
+        (authorNames.length === 0 || authorNames.some((n) => hasName(item, n))),
     );
     if (matched.length) return toOriginal(matched, t, authorNames);
   }
@@ -593,7 +684,9 @@ async function findOriginal({ media, title, crew }) {
   for (const name of authorNames) {
     let items = [];
     try {
-      items = kmas.searchWebtoonsByWriter ? await kmas.searchWebtoonsByWriter(name) : [];
+      items = kmas.searchWebtoonsByWriter
+        ? await kmas.searchWebtoonsByWriter(name)
+        : [];
     } catch (error) {
       console.warn("원작자 이름으로 만화규장각 검색 실패:", error.message);
     }
@@ -607,7 +700,9 @@ async function findOriginal({ media, title, crew }) {
     const longest = candidates
       .map((item) => item.prdctNm || item.title)
       .sort((a, b) => compact(b).length - compact(a).length)[0];
-    const sameWork = candidates.filter((item) => (item.prdctNm || item.title) === longest);
+    const sameWork = candidates.filter(
+      (item) => (item.prdctNm || item.title) === longest,
+    );
     return toOriginal(sameWork, longest, authorNames);
   }
 
@@ -665,11 +760,16 @@ async function renderOriginal({ media, title, crew }) {
     : "";
 
   card.querySelector(".origin-label").textContent = original.label;
-  card.querySelector(".origin-text strong").textContent = original.title || original.writer;
+  card.querySelector(".origin-text strong").textContent =
+    original.title || original.writer;
 
   // "윤태호 · 다음웹툰" (플랫폼이 없으면 작가 이름만)
-  card.querySelector(".origin-text p").textContent =
-    [original.writer, original.platform].filter(Boolean).join(" · ");
+  card.querySelector(".origin-text p").textContent = [
+    original.writer,
+    original.platform,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   originSection.style.display = "";
 }
@@ -681,7 +781,8 @@ async function renderMovie() {
   const movie = await tmdb.getMovieDetail(id);
 
   if (!movie) {
-    document.getElementById("title").textContent = "작품 정보를 불러오지 못했습니다.";
+    document.getElementById("title").textContent =
+      "작품 정보를 불러오지 못했습니다.";
     return;
   }
 
@@ -695,11 +796,14 @@ async function renderMovie() {
   const year = (movie.release_date || "").slice(0, 4);
   document.getElementById("title").textContent = movie.title;
   document.getElementById("sub").textContent = `${year} · ${movie.runtime}분`;
-  document.getElementById("overview").textContent = movie.overview || "줄거리 정보가 없습니다.";
+  document.getElementById("overview").textContent =
+    movie.overview || "줄거리 정보가 없습니다.";
   document.title = `StoLink - ${movie.title}`;
 
   // 장르
-  document.getElementById("genres").innerHTML = movie.genres.map((g) => `<li>${esc(g.name)}</li>`).join("");
+  document.getElementById("genres").innerHTML = movie.genres
+    .map((g) => `<li>${esc(g.name)}</li>`)
+    .join("");
 
   // 내 보관함 저장 + 볼 수 있는 곳
   setupSaveBox({
@@ -715,16 +819,26 @@ async function renderMovie() {
 
   // 개봉일, 제작사, 감독
   document.getElementById("release").textContent = movie.release_date;
-  document.getElementById("company").textContent = movie.production_companies.map((c) => c.name).join(", ");
+  document.getElementById("company").textContent = movie.production_companies
+    .map((c) => c.name)
+    .join(", ");
 
   const director = movie.credits.crew.find((p) => p.job === "Director");
-  document.getElementById("director").textContent = director ? director.name : "-";
+  document.getElementById("director").textContent = director
+    ? director.name
+    : "-";
 
   // 각본 (각본가가 여러 명이면 쉼표로)
-  const writers = [...new Set(
-    movie.credits.crew.filter((p) => ["Screenplay", "Writer"].includes(p.job)).map((p) => p.name)
-  )];
-  document.getElementById("writer").textContent = writers.length ? writers.join(", ") : "-";
+  const writers = [
+    ...new Set(
+      movie.credits.crew
+        .filter((p) => ["Screenplay", "Writer"].includes(p.job))
+        .map((p) => p.name),
+    ),
+  ];
+  document.getElementById("writer").textContent = writers.length
+    ? writers.join(", ")
+    : "-";
 
   // 출연진 (앞 6명)
   renderCast(movie.credits.cast.slice(0, 6));
@@ -733,10 +847,18 @@ async function renderMovie() {
   await renderCrew(movie.credits.crew);
 
   // 이어서 탐색하기 (주연 배우 / 원작 작가 / 감독의 다른 작품)
-  await renderExplore({ media: "movie", cast: movie.credits.cast, crew: movie.credits.crew });
+  await renderExplore({
+    media: "movie",
+    cast: movie.credits.cast,
+    crew: movie.credits.crew,
+  });
 
   // 원작 정보 (원작이 없으면 섹션 숨김)
-  await renderOriginal({ media: "movie", title: movie.title, crew: movie.credits.crew });
+  await renderOriginal({
+    media: "movie",
+    title: movie.title,
+    crew: movie.credits.crew,
+  });
 }
 
 /* ---------------------------------------------------------
@@ -769,7 +891,8 @@ async function renderTv() {
   const tv = await tmdb.getTvDetailWithCredits?.(id);
 
   if (!tv) {
-    document.getElementById("title").textContent = "작품 정보를 불러오지 못했습니다.";
+    document.getElementById("title").textContent =
+      "작품 정보를 불러오지 못했습니다.";
     return;
   }
 
@@ -788,7 +911,8 @@ async function renderTv() {
 
   // 제목, 줄거리
   document.getElementById("title").textContent = tv.name;
-  document.getElementById("overview").textContent = tv.overview || "줄거리 정보가 없습니다.";
+  document.getElementById("overview").textContent =
+    tv.overview || "줄거리 정보가 없습니다.";
   document.title = `StoLink - ${tv.name}`;
 
   // 부제목: "2014 · 시즌 1 · 20부작 · 회당 70분"
@@ -799,10 +923,14 @@ async function renderTv() {
     tv.number_of_seasons > 1 ? `시즌 ${tv.number_of_seasons}` : "",
     tv.number_of_episodes ? `${tv.number_of_episodes}부작` : "",
     runtime ? `회당 ${runtime}분` : "",
-  ].filter(Boolean).join(" · ");
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   // 장르
-  document.getElementById("genres").innerHTML = (tv.genres || []).map((g) => `<li>${esc(g.name)}</li>`).join("");
+  document.getElementById("genres").innerHTML = (tv.genres || [])
+    .map((g) => `<li>${esc(g.name)}</li>`)
+    .join("");
 
   // 내 보관함 저장 + 볼 수 있는 곳
   setupSaveBox({
@@ -820,20 +948,26 @@ async function renderTv() {
   setLabel("release", "방영");
   const start = formatDate(tv.first_air_date);
   const end = tv.in_production ? "방영 중" : formatDate(tv.last_air_date);
-  document.getElementById("release").textContent = start ? `${start} ~ ${end || ""}` : "-";
+  document.getElementById("release").textContent = start
+    ? `${start} ~ ${end || ""}`
+    : "-";
 
   // 방송사 (tvN, 넷플릭스 ...) - 영화의 '제작' 자리에 표시
   setLabel("company", "방송");
-  document.getElementById("company").textContent = joinNames((tv.networks || []).map((n) => n.name));
+  document.getElementById("company").textContent = joinNames(
+    (tv.networks || []).map((n) => n.name),
+  );
 
   // 연출: 참여 회차가 많은 감독 → 없으면 기획(created_by)
   const directors = crewNames(crew, ["Director"]);
-  document.getElementById("director").textContent =
-    joinNames(directors.length ? directors : (tv.created_by || []).map((p) => p.name));
+  document.getElementById("director").textContent = joinNames(
+    directors.length ? directors : (tv.created_by || []).map((p) => p.name),
+  );
 
   // 각본
-  document.getElementById("writer").textContent =
-    joinNames(crewNames(crew, ["Screenplay", "Writer", "Teleplay", "Series Composition"]));
+  document.getElementById("writer").textContent = joinNames(
+    crewNames(crew, ["Screenplay", "Writer", "Teleplay", "Series Composition"]),
+  );
 
   // 원작 칸은 아래 renderOriginal 이 채움 (원작이 없으면 "-" 그대로)
 
@@ -844,7 +978,7 @@ async function renderTv() {
       name: a.name,
       profile_path: a.profile_path,
       character: a.roles?.[0]?.character,
-    }))
+    })),
   );
 
   // 제작진 (감독, 각본, 원작 ...)
@@ -877,7 +1011,9 @@ const ROLE_WORDS = ["원작", "저", "글", "그림", "외", "작", "지음"];
 function namesIn(text) {
   return (text || "")
     .split(/[\s,·/()]+/)
-    .filter((name) => name && !ROLE_WORDS.includes(name) && !name.includes("편집부"));
+    .filter(
+      (name) => name && !ROLE_WORDS.includes(name) && !name.includes("편집부"),
+    );
 }
 
 // 줄거리 안의 HTML 태그(<b> 등) 제거
@@ -893,7 +1029,8 @@ function isBrandWebtoon(item) {
 // 만화규장각에서 이 웹툰의 항목들 찾기
 async function findWebtoonItems(title, writer) {
   const sameWork = (item) =>
-    isSameWork(item.prdctNm || item.title, title) && (!writer || hasName(item, writer));
+    isSameWork(item.prdctNm || item.title, title) &&
+    (!writer || hasName(item, writer));
 
   // 1) 제목으로 검색
   let items = kmas.searchByTitle ? await kmas.searchByTitle(title) : [];
@@ -907,7 +1044,11 @@ async function findWebtoonItems(title, writer) {
     } catch {
       items = [];
     }
-    matched = items.filter((item) => compact(item.prdctNm || item.title) === compact(title) && hasName(item, writer));
+    matched = items.filter(
+      (item) =>
+        compact(item.prdctNm || item.title) === compact(title) &&
+        hasName(item, writer),
+    );
   }
   return matched;
 }
@@ -915,10 +1056,15 @@ async function findWebtoonItems(title, writer) {
 // 작가 사진 찾기 (TMDB) - 이름이 정확히 같은 '작가' 분야 사람의 프로필 사진
 async function writerPhoto(name) {
   const results = (await tmdb.searchPerson?.(name)) || [];
-  const candidates = results.filter((p) => p.known_for_department === "Writing").slice(0, 3);
+  const candidates = results
+    .filter((p) => p.known_for_department === "Writing")
+    .slice(0, 3);
   for (const p of candidates) {
     const detail = await tmdb.getPersonDetail?.(p.id);
-    if (detail && [detail.name, ...(detail.also_known_as || [])].includes(name)) {
+    if (
+      detail &&
+      [detail.name, ...(detail.also_known_as || [])].includes(name)
+    ) {
       return detail.profile_path || "";
     }
   }
@@ -929,7 +1075,9 @@ async function writerPhoto(name) {
 async function otherWebtoonsOf(name, currentTitle) {
   let items = [];
   try {
-    items = kmas.searchWebtoonsByWriter ? await kmas.searchWebtoonsByWriter(name) : [];
+    items = kmas.searchWebtoonsByWriter
+      ? await kmas.searchWebtoonsByWriter(name)
+      : [];
   } catch {
     return [];
   }
@@ -939,10 +1087,20 @@ async function otherWebtoonsOf(name, currentTitle) {
     const workTitle = item.prdctNm || item.title;
     if (!workTitle || !hasName(item, name) || isBrandWebtoon(item)) return;
     if (compact(workTitle) === compact(currentTitle)) return; // 지금 작품 제외
-    if (namesIn(`${item.sntncWritrNm} ${item.pictrWritrNm}`).some((n) => n !== name)) return; // 공동 작업 제외
+    if (
+      namesIn(`${item.sntncWritrNm} ${item.pictrWritrNm}`).some(
+        (n) => n !== name,
+      )
+    )
+      return; // 공동 작업 제외
 
     const key = compact(workTitle);
-    const saved = works.get(key) || { title: workTitle, image: "", genre: "", hasPlatform: false };
+    const saved = works.get(key) || {
+      title: workTitle,
+      image: "",
+      genre: "",
+      hasPlatform: false,
+    };
     // 웹툰 기록(플랫폼 있음)의 표지·장르를 우선
     if (item.pltfomCdNm && !saved.hasPlatform) {
       saved.hasPlatform = true;
@@ -957,13 +1115,15 @@ async function otherWebtoonsOf(name, currentTitle) {
 
   // 웹툰으로 연재된 작품 + 표지가 있는 작품을 앞으로
   return [...works.values()]
-    .sort((a, b) => (b.hasPlatform - a.hasPlatform) || (!!b.image - !!a.image))
+    .sort((a, b) => b.hasPlatform - a.hasPlatform || !!b.image - !!a.image)
     .slice(0, 3);
 }
 
 // '작가의 다른 웹툰' 박스
 function webtoonBoxHtml({ name, photo, works }) {
-  const items = works.map((w) => `
+  const items = works
+    .map(
+      (w) => `
       <li>
         <a href="detail.html?${new URLSearchParams({ type: "webtoon", title: w.title, writer: name })}" style="color:inherit; text-decoration:none;">
           <div class="work-thumb" style="overflow:hidden;">
@@ -972,7 +1132,9 @@ function webtoonBoxHtml({ name, photo, works }) {
           <p>${esc(w.title)}</p>
           <small style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${esc(["웹툰", w.genre].filter(Boolean).join(" · "))}</small>
         </a>
-      </li>`).join("");
+      </li>`,
+    )
+    .join("");
 
   return `
     <div class="explore-box">
@@ -1002,9 +1164,11 @@ function renderAdaptations(adaptations) {
       ? `<img src="${esc(a.poster)}" alt="" style="display:block; width:100%; height:100%; object-fit:cover;">`
       : "";
 
-    card.querySelector(".origin-label").textContent = a.media === "movie" ? "영화" : "드라마";
+    card.querySelector(".origin-label").textContent =
+      a.media === "movie" ? "영화" : "드라마";
     card.querySelector(".origin-text strong").textContent = a.title;
-    card.querySelector(".origin-text p").textContent = a.media === "movie" ? "영화로 만들어진 작품" : "드라마로 만들어진 작품";
+    card.querySelector(".origin-text p").textContent =
+      a.media === "movie" ? "영화로 만들어진 작품" : "드라마로 만들어진 작품";
     const linkText = card.querySelector(".origin-link");
     if (linkText) linkText.textContent = "작품 보기";
     return card;
@@ -1029,10 +1193,12 @@ async function renderWebtoon() {
 
   const matched = title ? await findWebtoonItems(title, writerParam) : [];
   if (matched.length === 0) {
-    document.getElementById("overview").textContent = "만화규장각에서 작품 정보를 찾지 못했습니다.";
+    document.getElementById("overview").textContent =
+      "만화규장각에서 작품 정보를 찾지 못했습니다.";
     const saveButton = document.querySelector(".save-btn");
     if (saveButton) saveButton.disabled = true; // 작품 정보가 없으면 저장할 수 없음
-    document.getElementById("cast-list").innerHTML = `<li class="cast-empty">작가 정보가 없습니다.</li>`;
+    document.getElementById("cast-list").innerHTML =
+      `<li class="cast-empty">작가 정보가 없습니다.</li>`;
     return;
   }
 
@@ -1041,7 +1207,9 @@ async function renderWebtoon() {
   const unique = (list) => [...new Set(list.filter(Boolean))];
 
   // ── 상단
-  const cover = web.imageDownloadUrl || matched.find((item) => item.imageDownloadUrl)?.imageDownloadUrl;
+  const cover =
+    web.imageDownloadUrl ||
+    matched.find((item) => item.imageDownloadUrl)?.imageDownloadUrl;
   if (cover) {
     document.getElementById("poster").innerHTML =
       `<img src="${esc(kmasImageUrl(cover))}" alt="${esc(title)}" style="width:100%; height:100%; object-fit:cover;">`;
@@ -1052,18 +1220,29 @@ async function renderWebtoon() {
   document.title = `StoLink - ${workTitle}`;
 
   const platforms = unique(matched.map((item) => item.pltfomCdNm));
-  const finished = web.fnshYn === "Y" ? "완결" : web.fnshYn === "N" ? "연재 중" : "";
-  const age = [web.ageGradCdNm, ...matched.map((item) => item.ageGradCdNm)].find((a) => a && a !== "확인필요") || "";
+  const finished =
+    web.fnshYn === "Y" ? "완결" : web.fnshYn === "N" ? "연재 중" : "";
+  const age =
+    [web.ageGradCdNm, ...matched.map((item) => item.ageGradCdNm)].find(
+      (a) => a && a !== "확인필요",
+    ) || "";
 
   // 부제목: "네이버웹툰 · 완결 · 15세 이상"
-  document.getElementById("sub").textContent = [platforms[0], finished, age].filter(Boolean).join(" · ") || "웹툰";
+  document.getElementById("sub").textContent =
+    [platforms[0], finished, age].filter(Boolean).join(" · ") || "웹툰";
 
   // 장르 (웹툰 기록의 장르 먼저)
-  const genres = unique([web.mainGenreCdNm, ...matched.map((item) => item.mainGenreCdNm)]);
-  document.getElementById("genres").innerHTML = genres.map((g) => `<li>${esc(g)}</li>`).join("");
+  const genres = unique([
+    web.mainGenreCdNm,
+    ...matched.map((item) => item.mainGenreCdNm),
+  ]);
+  document.getElementById("genres").innerHTML = genres
+    .map((g) => `<li>${esc(g)}</li>`)
+    .join("");
 
   // 내 보관함 저장 (웹툰은 '볼 수 있는 곳' API 가 없어서 저장만)
-  const saveWriter = writerParam || namesIn(web.sntncWritrNm || web.pictrWritrNm)[0] || "";
+  const saveWriter =
+    writerParam || namesIn(web.sntncWritrNm || web.pictrWritrNm)[0] || "";
   setupSaveBox({
     type: "webtoon",
     title: workTitle,
@@ -1074,22 +1253,40 @@ async function renderWebtoon() {
   });
 
   // 줄거리: 웹툰 기록 → 없으면 가장 긴 소개
-  const outline = plainText(web.outline) ||
-    matched.map((item) => plainText(item.outline)).sort((a, b) => b.length - a.length)[0];
-  document.getElementById("overview").textContent = outline || "줄거리 정보가 없습니다.";
+  const outline =
+    plainText(web.outline) ||
+    matched
+      .map((item) => plainText(item.outline))
+      .sort((a, b) => b.length - a.length)[0];
+  document.getElementById("overview").textContent =
+    outline || "줄거리 정보가 없습니다.";
 
   // ── 정보 목록: 연재 / 출판 / 글 / 그림 / 이용 등급
-  const textWriters = unique(namesIn(web.sntncWritrNm).concat(...matched.map((i) => namesIn(i.sntncWritrNm))));
-  const drawWriters = unique(namesIn(web.pictrWritrNm).concat(...matched.map((i) => namesIn(i.pictrWritrNm))));
+  const textWriters = unique(
+    namesIn(web.sntncWritrNm).concat(
+      ...matched.map((i) => namesIn(i.sntncWritrNm)),
+    ),
+  );
+  const drawWriters = unique(
+    namesIn(web.pictrWritrNm).concat(
+      ...matched.map((i) => namesIn(i.pictrWritrNm)),
+    ),
+  );
 
   setLabel("release", "연재");
   document.getElementById("release").textContent = joinNames(platforms);
   setLabel("company", "출판");
-  document.getElementById("company").textContent = joinNames(unique(matched.map((item) => item.plscmpnIdNm)));
+  document.getElementById("company").textContent = joinNames(
+    unique(matched.map((item) => item.plscmpnIdNm)),
+  );
   setLabel("director", "글");
-  document.getElementById("director").textContent = joinNames(textWriters.length ? textWriters : drawWriters);
+  document.getElementById("director").textContent = joinNames(
+    textWriters.length ? textWriters : drawWriters,
+  );
   setLabel("writer", "그림");
-  document.getElementById("writer").textContent = joinNames(drawWriters.length ? drawWriters : textWriters);
+  document.getElementById("writer").textContent = joinNames(
+    drawWriters.length ? drawWriters : textWriters,
+  );
   setLabel("author", "이용 등급");
   document.getElementById("author").textContent = age || "-";
 
@@ -1097,13 +1294,21 @@ async function renderWebtoon() {
   const castTitle = document.querySelector(".cast-section h2");
   if (castTitle) castTitle.textContent = "작가";
 
-  const writers = unique([...textWriters, ...drawWriters]).slice(0, 4).map((name) => ({
-    name,
-    roles: [textWriters.includes(name) && "글", drawWriters.includes(name) && "그림"].filter(Boolean),
-  }));
+  const writers = unique([...textWriters, ...drawWriters])
+    .slice(0, 4)
+    .map((name) => ({
+      name,
+      roles: [
+        textWriters.includes(name) && "글",
+        drawWriters.includes(name) && "그림",
+      ].filter(Boolean),
+    }));
   const photos = await Promise.all(writers.map((w) => writerPhoto(w.name)));
 
-  document.getElementById("cast-list").innerHTML = writers.map((w, i) => `
+  document.getElementById("cast-list").innerHTML =
+    writers
+      .map(
+        (w, i) => `
     <li class="cast-card">
       <a href="writer.html?${new URLSearchParams({ writer: w.name })}">
         <div class="cast-photo">
@@ -1112,7 +1317,9 @@ async function renderWebtoon() {
         <p class="cast-name">${esc(w.name)}</p>
         <p class="cast-role">${w.roles.join(" · ")}</p>
       </a>
-    </li>`).join("") || `<li class="cast-empty">작가 정보가 없습니다.</li>`;
+    </li>`,
+      )
+      .join("") || `<li class="cast-empty">작가 정보가 없습니다.</li>`;
 
   // ── 원작 정보 → 실사화 작품 (adaptation.js: 작가 페이지와 같은 찾기 규칙)
   const adaptations = (await adaptation.findAdaptations?.(workTitle)) || [];
@@ -1126,34 +1333,50 @@ async function renderWebtoon() {
   const writerBoxes = await Promise.all(
     writers.slice(0, 2).map(async (w, i) => {
       const works = await otherWebtoonsOf(w.name, workTitle);
-      return works.length ? webtoonBoxHtml({ name: w.name, photo: photos[i], works }) : "";
-    })
+      return works.length
+        ? webtoonBoxHtml({ name: w.name, photo: photos[i], works })
+        : "";
+    }),
   );
   const boxes = writerBoxes.filter(Boolean);
 
   // 실사화 작품이 있으면 그 작품의 감독·주연 배우의 다른 작품도
   if (boxes.length < 3 && adaptations[0]) {
     const a = adaptations[0];
-    const detail = a.media === "movie" ? await tmdb.getMovieDetail(a.id) : await tmdb.getTvDetailWithCredits?.(a.id);
-    const credits = a.media === "movie" ? detail?.credits : detail?.aggregate_credits;
+    const detail =
+      a.media === "movie"
+        ? await tmdb.getMovieDetail(a.id)
+        : await tmdb.getTvDetailWithCredits?.(a.id);
+    const credits =
+      a.media === "movie" ? detail?.credits : detail?.aggregate_credits;
     const people = [
-      { role: "감독", person: (credits?.crew || []).find((c) => jobsOf(c).includes("Director")) },
+      {
+        role: "감독",
+        person: (credits?.crew || []).find((c) =>
+          jobsOf(c).includes("Director"),
+        ),
+      },
       { role: "배우", person: (credits?.cast || [])[0] },
     ].filter((t) => t.person);
 
     const genres = await loadGenreNames();
     for (const t of people) {
       if (boxes.length >= 3) break;
-      const works = await otherWorksOf(t.person.id, { media: a.media, id: a.id });
+      const works = await otherWorksOf(t.person.id, {
+        media: a.media,
+        id: a.id,
+      });
       if (works.length === 0) continue;
-      boxes.push(exploreBoxHtml({
-        role: `${a.media === "movie" ? "영화" : "드라마"} ${t.role}`,
-        name: await koreanNameOf(t.person),
-        person: t.person,
-        href: `writer.html?person=${t.person.id}`,
-        works,
-        genres,
-      }));
+      boxes.push(
+        exploreBoxHtml({
+          role: `${a.media === "movie" ? "영화" : "드라마"} ${t.role}`,
+          name: await koreanNameOf(t.person),
+          person: t.person,
+          href: `writer.html?person=${t.person.id}`,
+          works,
+          genres,
+        }),
+      );
     }
   }
 
