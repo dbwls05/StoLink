@@ -283,7 +283,32 @@ const PROVIDER_KO = {
 };
 const providerName = (name) => PROVIDER_KO[name] || name;
 
-async function renderProviders(media, tmdbId) {
+// 로고를 누르면 갈 곳: 그 서비스에서 작품 제목으로 검색한 화면
+// - TMDB 는 서비스별 작품 주소를 주지 않고 TMDB 의 '볼 수 있는 곳' 페이지 주소(link) 하나만 줌
+//   → 그래서 원래는 어떤 로고를 눌러도 TMDB 사이트로 갔음
+// - 서비스 검색 화면으로 보내면 바로 그 작품을 찾을 수 있음
+// - 검색 주소를 모르는 서비스는 그 서비스 첫 화면, 목록에 없는 서비스만 예전처럼 TMDB 페이지
+const PROVIDER_SEARCH = {
+  넷플릭스: (q) => `https://www.netflix.com/search?q=${q}`,
+  티빙: (q) => `https://www.tving.com/search?keyword=${q}`,
+  웨이브: (q) => `https://www.wavve.com/search?searchWord=${q}`,
+  왓챠: (q) => `https://watcha.com/search?query=${q}`,
+  "디즈니+": (q) => `https://www.disneyplus.com/search?q=${q}`,
+  쿠팡플레이: () => "https://www.coupangplay.com/",
+  "Apple TV": (q) => `https://tv.apple.com/kr/search?term=${q}`,
+  "Apple TV+": (q) => `https://tv.apple.com/kr/search?term=${q}`,
+  "구글 플레이": (q) => `https://play.google.com/store/search?q=${q}&c=movies`,
+  "프라임 비디오": (q) => `https://www.primevideo.com/search?phrase=${q}`,
+  라프텔: (q) => `https://laftel.net/search?keyword=${q}`,
+  "네이버 시리즈온": () => "https://serieson.naver.com/",
+};
+
+function providerLink(name, title, fallback) {
+  const make = PROVIDER_SEARCH[name];
+  return make ? make(encodeURIComponent(title || "")) : fallback || "#";
+}
+
+async function renderProviders(media, tmdbId, title = "") {
   const box = document.querySelector(".save-box");
   if (!box) return;
 
@@ -314,7 +339,7 @@ async function renderProviders(media, tmdbId) {
       <ul class="provider-list">
         ${list.map((p) => `
           <li>
-            <a class="provider-item" href="${esc(data.link || "#")}" target="_blank" rel="noopener">
+            <a class="provider-item" href="${esc(providerLink(p.provider_name, title, data.link))}" target="_blank" rel="noopener">
               <span class="provider-logo">
                 ${p.logo_path ? `<img src="${IMG}/w92${p.logo_path}" alt="">` : esc(p.provider_name.slice(0, 1))}
               </span>
@@ -723,7 +748,7 @@ async function renderMovie() {
     genres: movie.genres.map((g) => g.name),
     href: `detail.html?type=movie&id=${id}`,
   });
-  renderProviders("movie", id);
+  renderProviders("movie", id, movie.title);
 
   // 개봉일, 제작사, 감독
   document.getElementById("release").textContent = movie.release_date;
@@ -826,7 +851,7 @@ async function renderTv() {
     genres: (tv.genres || []).map((g) => g.name),
     href: `detail.html?type=tv&id=${id}`,
   });
-  renderProviders("tv", id);
+  renderProviders("tv", id, tv.name);
 
   // 방영 기간: "2014.10.17 ~ 2014.12.20" / 아직 방영 중이면 "2025.07.16 ~ 방영 중"
   setLabel("release", "방영");
