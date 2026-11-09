@@ -29,13 +29,18 @@
       </h1>
 
       <nav class="filter">
-        <button type="button" class="chip active">전체 <span>00</span></button>
-        <button type="button" class="chip">영화 <span>00</span></button>
-        <button type="button" class="chip">드라마·TV <span>00</span></button>
-        <button type="button" class="chip">웹툰 <span>00</span></button>
-        <button type="button" class="chip sort">
-          정렬 <i class="caret"></i>
-        </button>
+        <button type="button" class="chip active" data-kind="all">전체 <span>00</span></button>
+        <button type="button" class="chip" data-kind="movie">영화 <span>00</span></button>
+        <button type="button" class="chip" data-kind="tv">드라마·TV <span>00</span></button>
+        <button type="button" class="chip" data-kind="webtoon">웹툰 <span>00</span></button>
+        <div class="sort-wrap">
+          <button type="button" class="chip sort" id="sort-btn">관련도순 <i class="caret"></i></button>
+          <ul class="sort-menu" id="sort-menu" hidden>
+            <li data-sort="relevance" class="selected">관련도순</li>
+            <li data-sort="latest">최신순</li>
+            <li data-sort="rating">평점순</li>
+          </ul>
+        </div>
       </nav>
 
       <ul class="result-list" id="result-list"></ul>
