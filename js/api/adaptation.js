@@ -68,6 +68,15 @@ function pickBest(results, webtoonTitle, media) {
   return toAdaptation(matched[0], media);
 }
 
+// 반대 방향: 영화/드라마 → 직접 지정된 원작 웹툰 제목
+// 예) findManualOriginal("movie", 801803) → "문유"  (작품 상세의 '원작 정보'에서 사용)
+export function findManualOriginal(media, id) {
+  const entry = Object.entries(MANUAL).find(([, list]) =>
+    list.some((item) => item.media === media && String(item.id) === String(id))
+  );
+  return entry ? entry[0] : null;
+}
+
 export async function findAdaptations(webtoonTitle) {
   if (MANUAL[webtoonTitle]) {
     return fromManual(MANUAL[webtoonTitle]);

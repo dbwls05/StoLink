@@ -24,7 +24,7 @@
 // - 필터: 전체 / 실사화된 작품
 // =========================================================
 
-import { searchPerson, getPersonDetail } from "../api/tmdb.js";
+import { searchPerson, getPersonDetail, getPersonCredits } from "../api/tmdb.js";
 // kmas.js 는 통째로(* as kmas) 불러옴
 // → kmas.js 가 예전 버전이라 함수 하나가 없어도 writer.js 전체가 멈추지 않음
 import * as kmas from "../api/kmas.js";
@@ -48,7 +48,7 @@ const IMG = "https://image.tmdb.org/t/p";
 
 // TMDB 활동 분야(영어) → 배지 글자
 const DEPARTMENT_KO = {
-  Writing: "작가",
+  Writing: "각본가",
   Directing: "감독",
   Acting: "배우",
   Production: "제작자",
@@ -69,7 +69,7 @@ const el = {
   repList: document.getElementById("rep-list"),
   worksHead: document.getElementById("works-head"),
   worksBody: document.getElementById("works-body"),
-  filterButtons: document.querySelectorAll(".filter-btn"),
+  filterToggle: document.querySelector(".filter-toggle"),
 };
 
 /* ---------------------------------------------------------
@@ -99,20 +99,23 @@ function showPhoto(profilePath, name) {
 }
 
 /* ---------------------------------------------------------
-   2. TMDB 에서 '그 작가' 찾기
+   2. TMDB 에서 '그 사람' 찾기
    - 검색 결과 후보를 순서대로 상세 조회해서
-     이름이 같거나 also_known_as 에 한글 이름이 있으면 그 사람으로 확정
-   - 같은 이름의 배우가 먼저 잡히지 않도록 Writing(작가) 분야를 먼저 확인
+     이름이 같거나 also_known_as(다른 이름 목록)에 한글 이름이 있으면 그 사람으로 확정
+   - 같은 이름이 여러 명일 수 있어서 '누구를 먼저 볼지'가 중요함
+     · preferWriting = true  (웹툰이 있는 이름 = 웹툰 작가) → 작가(Writing) 분야를 먼저
+     · preferWriting = false (웹툰이 없는 이름 = 감독·배우 등) → TMDB 검색 순서(인기순) 그대로
+       예) "김원석" 은 TMDB 에 5명 → 인기순 1번이 드라마 감독 김원석
    - 상세 조회는 최대 5명까지만 (요청이 너무 많아지지 않게)
 --------------------------------------------------------- */
-async function findWriter(writerName) {
-  const results = (await searchPerson(writerName)) || [];
+async function findWriter(writerName, { preferWriting = true, results } = {}) {
+  results = results || (await searchPerson(writerName)) || [];
 
-  // Writing 분야를 앞으로 정렬 (나머지 순서는 TMDB 검색 순서 유지)
-  const candidates = [...results]
-    .sort((a, b) =>
-      (b.known_for_department === "Writing") - (a.known_for_department === "Writing"))
-    .slice(0, 5);
+  const candidates = (preferWriting
+    ? [...results].sort((a, b) =>
+        (b.known_for_department === "Writing") - (a.known_for_department === "Writing"))
+    : results
+  ).slice(0, 5);
 
   for (const person of candidates) {
     const detail = await getPersonDetail(person.id, "ko-KR");
@@ -123,7 +126,7 @@ async function findWriter(writerName) {
       return detail; // 찾음
     }
   }
-  return null; // TMDB 에 이 작가가 없음
+  return null; // TMDB 에 이 사람이 없음
 }
 
 // 소개글: 한국어 → 없으면 영어
@@ -197,14 +200,15 @@ el.backLink.addEventListener("click", (e) => {
 });
 
 /* ---------------------------------------------------------
-   4. 프로필 불러오기
+   4. 프로필 그리기
+   - person : TMDB 인물 상세 (없으면 null)
+   - mode   : "webtoon"(웹툰 작가) / "screen"(영화·드라마 제작진)
 --------------------------------------------------------- */
-async function loadProfile(writerName) {
-  let person = await findWriter(writerName);
+async function loadProfile(writerName, person, mode) {
   let isSample = false;
 
-  // TMDB 에 없으면 샘플 데이터에 있는지 확인 (예: 조석)
-  if (!person && SAMPLE_WRITERS[writerName]) {
+  // 웹툰 작가인데 TMDB 에 없으면 샘플 데이터에 있는지 확인 (예: 조석)
+  if (!person && mode === "webtoon" && SAMPLE_WRITERS[writerName]) {
     person = SAMPLE_WRITERS[writerName];
     isSample = true;
   }
@@ -215,10 +219,11 @@ async function loadProfile(writerName) {
     showDefaultPhoto();
     renderBio(null);
   } else {
+    // 배지: 웹툰 작가 모드는 "웹툰 작가", 영화·드라마 모드는 감독 / 배우 / 각본가 ...
     el.badge.textContent =
-      person.known_for_department === "Writing"
+      mode === "webtoon"
         ? "웹툰 작가"
-        : DEPARTMENT_KO[person.known_for_department] || "작가";
+        : DEPARTMENT_KO[person.known_for_department] || "제작진";
 
     if (person.profile_path) {
       showPhoto(person.profile_path, writerName);
@@ -534,7 +539,7 @@ function renderWorksTable(webtoons, writerName) {
         : `<span class="no-adapt">실사화 없음</span>`;
 
       return `
-        <tr data-adapted="${adapted}">
+        <tr data-tags="all${adapted ? " adapted" : ""}">
           <td>
             <a href="${webtoonDetailUrl(webtoon, writerName)}" class="work-title">
               <span class="work-thumb">
@@ -561,45 +566,59 @@ function renderWorksMessage(message) {
   el.worksBody.innerHTML = `<tr><td class="works-message" colspan="10">${message}</td></tr>`;
 }
 
-// 필터: '실사화된 작품'이 선택되면 data-adapted="false" 인 줄을 숨김
+// ---------------------------------------------------------
+// 필터
+// - 표의 각 줄에 data-tags="all adapted" / "all movie" 처럼 '태그'를 붙여 두고
+//   선택된 버튼의 data-filter 값이 태그에 있는 줄만 보여줌
+// - 모드에 따라 버튼 구성이 다름
+//     웹툰 작가     : 전체 / 실사화된 작품
+//     영화·드라마   : 전체 / 영화 / 드라마
+// ---------------------------------------------------------
+function setFilters(filters) {
+  el.filterToggle.innerHTML = filters
+    .map((f, i) =>
+      `<button type="button" class="filter-btn${i === 0 ? " is-active" : ""}" data-filter="${f.key}" data-empty="${f.empty || ""}">${f.label}</button>`)
+    .join("");
+}
+
 function applyFilter() {
-  const active = document.querySelector(".filter-btn.is-active");
-  const onlyAdapted = active?.dataset.filter === "adapted";
+  const active = el.filterToggle.querySelector(".filter-btn.is-active");
+  const key = active?.dataset.filter || "all";
 
   let visible = 0;
-  el.worksBody.querySelectorAll("tr[data-adapted]").forEach((row) => {
-    row.hidden = onlyAdapted && row.dataset.adapted !== "true";
+  el.worksBody.querySelectorAll("tr[data-tags]").forEach((row) => {
+    row.hidden = !row.dataset.tags.split(" ").includes(key);
     if (!row.hidden) visible++;
   });
 
-  // 실사화된 작품이 하나도 없으면 안내 줄 표시
+  // 해당하는 작품이 하나도 없으면 안내 줄 표시 (예: "실사화된 작품이 없어요.")
   el.worksBody.querySelector(".filter-empty")?.remove();
-  if (onlyAdapted && visible === 0 && el.worksBody.querySelector("tr[data-adapted]")) {
+  if (visible === 0 && el.worksBody.querySelector("tr[data-tags]")) {
     el.worksBody.insertAdjacentHTML(
       "beforeend",
-      `<tr class="filter-empty"><td class="works-message" colspan="10">실사화된 작품이 없어요.</td></tr>`
+      `<tr class="filter-empty"><td class="works-message" colspan="10">${active?.dataset.empty || "작품이 없어요."}</td></tr>`
     );
   }
 }
 
-// 필터 버튼 클릭
-el.filterButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    el.filterButtons.forEach((b) => b.classList.remove("is-active"));
-    button.classList.add("is-active");
-    applyFilter();
-  });
+// 필터 버튼 클릭 (버튼이 나중에 바뀌어도 동작하도록 틀에서 한 번에 받음)
+el.filterToggle.addEventListener("click", (event) => {
+  const button = event.target.closest(".filter-btn");
+  if (!button) return;
+  el.filterToggle.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("is-active"));
+  button.classList.add("is-active");
+  applyFilter();
 });
 
 /* =========================================================
-   7. 작품 불러오기 (대표 작품 + 전체 작품 목록 공통)
-   - 만화규장각 · TMDB 요청은 한 번만 하고, 결과로 두 섹션을 함께 그림
+   7. 웹툰 작가 모드: 작품 불러오기 (대표 작품 + 전체 작품 목록)
+   - 웹툰 목록(webtoons)은 init 에서 이미 가져온 것을 받아서 사용
 ========================================================= */
-async function loadWorks(writerName) {
-  const items = await loadWebtoonItems(writerName);
-  const webtoons = toWebtoons(items, writerName);
-  console.log(`만화규장각 결과 ${items.length}건 → 작품 ${webtoons.length}개`, webtoons); // 확인용
-  if (items[0]) console.log("만화규장각 응답 항목 예시 (연재 시작일 항목이 있는지 확인용):", items[0]);
+async function loadWorks(writerName, webtoons) {
+  setFilters([
+    { key: "all", label: "전체" },
+    { key: "adapted", label: "실사화된 작품", empty: "실사화된 작품이 없어요." },
+  ]);
 
   if (webtoons.length === 0) {
     el.repList.innerHTML = `<li class="rep-empty">'${esc(writerName)}' 작가의 웹툰을 찾지 못했어요.</li>`;
@@ -614,31 +633,198 @@ async function loadWorks(writerName) {
 }
 
 /* =========================================================
-   8. 시작
+   8. 영화·드라마 모드 (감독, 배우, 각본가 등)
+   - TMDB 필모그래피(getPersonCredits)로 대표 작품 + 전체 작품 목록을 그림
+   - 웹툰 → 실사화 짝이 아니라 영화·드라마 작품만 보여줌
 ========================================================= */
-async function init() {
-  const writerName = (new URLSearchParams(location.search).get("writer") || "").trim();
 
-  // 주소에 작가 이름이 없을 때
-  if (!writerName) {
-    el.name.textContent = "작가 정보 없음";
-    el.badge.textContent = "안내";
-    showDefaultPhoto();
-    renderBio({ text: "작품 상세페이지에서 작가 이름을 눌러 들어와 주세요.", lang: "ko" });
-    el.profile.classList.remove("is-loading");
-    el.repList.innerHTML = `<li class="rep-empty">작가 정보가 없어 작품을 보여줄 수 없어요.</li>`;
-    renderWorksMessage("작가 정보가 없어 작품을 보여줄 수 없어요.");
+// TMDB 직무(영어) → 한국어
+const JOB_KO = {
+  Director: "감독",
+  Creator: "기획",
+  Screenplay: "각본",
+  Writer: "각본",
+  Teleplay: "각본",
+  Story: "원안",
+  "Original Story": "원작",
+  "Comic Book": "원작 만화",
+  Novel: "원작 소설",
+  Producer: "제작",
+  "Executive Producer": "총괄 제작",
+  "Director of Photography": "촬영",
+  Editor: "편집",
+  "Original Music Composer": "음악",
+};
+
+// 목록에서 뺄 드라마 장르: 토크쇼(10767), 뉴스(10763), 리얼리티·예능(10764)
+// → 배우·감독 페이지에 예능 출연이 섞이지 않게
+const EXCLUDED_TV_GENRES = [10767, 10763, 10764];
+
+// 출연(cast) + 제작(crew) 을 작품 하나씩으로 합침
+// - 같은 작품에서 '감독'과 '각본'을 둘 다 했으면 "감독 · 각본" 으로 한 줄
+// - 결과: [{ id, media: "movie"|"tv", title, year, poster, votes, roles }]
+function mergeCredits({ cast = [], crew = [] }) {
+  const map = new Map();
+
+  const add = (credit, role) => {
+    const media = credit.media_type;
+    if (media !== "movie" && media !== "tv") return;
+    if (credit.adult) return;
+    if (media === "tv" && (credit.genre_ids || []).some((g) => EXCLUDED_TV_GENRES.includes(g))) return;
+
+    const key = `${media}-${credit.id}`;
+    if (!map.has(key)) {
+      const date = credit.release_date || credit.first_air_date || "";
+      map.set(key, {
+        id: credit.id,
+        media,
+        title: credit.title || credit.name,
+        year: date.slice(0, 4),
+        poster: credit.poster_path ? `${IMG}/w342${credit.poster_path}` : "",
+        votes: credit.vote_count || 0, // 대표 작품 고를 때 기준 (투표 수 = 인지도)
+        roles: new Set(),
+      });
+    }
+    if (role) map.get(key).roles.add(role);
+  };
+
+  cast.forEach((c) => {
+    // "Self", "Himself" 같은 본인 출연(다큐·시상식 등)은 제외
+    if (/^(self|himself|herself|본인)/i.test(c.character || "")) return;
+    add(c, c.character ? `${c.character} 역` : "출연");
+  });
+  crew.forEach((c) => add(c, JOB_KO[c.job] || c.job));
+
+  return [...map.values()]
+    .map((w) => ({ ...w, roles: [...w.roles].join(" · ") }))
+    .sort((a, b) => (b.year || "0").localeCompare(a.year || "0")); // 최신 작품부터
+}
+
+const mediaKo = (media) => (media === "movie" ? "영화" : "드라마");
+
+// 대표 작품: 투표 수가 많은 작품 최대 6개, 포스터 카드
+function renderScreenRepresentative(works) {
+  const top = [...works].sort((a, b) => b.votes - a.votes).slice(0, 6);
+
+  el.repList.classList.add("is-screen"); // 포스터 카드용 배치
+  el.repList.innerHTML = top.length
+    ? top.map((w) => `
+      <li class="rep-card is-single">
+        ${coverLink({ href: screenDetailUrl(w), image: w.poster, title: w.title, label: mediaKo(w.media) })}
+        <p class="rep-meta">${[w.year, w.roles].filter(Boolean).map(esc).join(" · ")}</p>
+      </li>`).join("")
+    : `<li class="rep-empty">영화·드라마 작품 정보가 없어요.</li>`;
+}
+
+// 전체 작품 목록: 작품 / 구분 / 참여 / 공개 연도
+function renderScreenTable(works) {
+  el.worksHead.innerHTML = `<tr>${["작품", "구분", "참여", "공개 연도"].map((c) => `<th>${c}</th>`).join("")}</tr>`;
+
+  el.worksBody.innerHTML = works.map((w) => `
+    <tr data-tags="all ${w.media}">
+      <td>
+        <a href="${screenDetailUrl(w)}" class="work-title">
+          <span class="work-thumb">
+            ${w.poster ? `<img src="${esc(w.poster)}" alt="" loading="lazy" onerror="this.remove()">` : ""}
+          </span>
+          <span>${esc(w.title)}</span>
+        </a>
+      </td>
+      <td><span class="media-tag is-${w.media}">${mediaKo(w.media)}</span></td>
+      <td>${esc(w.roles) || "-"}</td>
+      <td>${w.year || "-"}</td>
+    </tr>`).join("");
+
+  applyFilter();
+}
+
+async function loadScreenWorks(person) {
+  setFilters([
+    { key: "all", label: "전체" },
+    { key: "movie", label: "영화", empty: "영화 작품이 없어요." },
+    { key: "tv", label: "드라마", empty: "드라마 작품이 없어요." },
+  ]);
+
+  const credits = (await getPersonCredits(person.id)) || {};
+  const works = mergeCredits(credits);
+  console.log(`TMDB 필모그래피 → 작품 ${works.length}개`, works); // 확인용
+
+  if (works.length === 0) {
+    el.repList.innerHTML = `<li class="rep-empty">영화·드라마 작품 정보가 없어요.</li>`;
+    renderWorksMessage("영화·드라마 작품 정보가 없어요.");
     return;
   }
 
-  // 이름은 TMDB 영문 이름 대신 주소의 한글 이름을 그대로 사용
+  renderScreenRepresentative(works);
+  renderScreenTable(works);
+}
+
+/* =========================================================
+   9. 시작
+   - 주소: writer.html?writer=이름  또는  writer.html?person=TMDB인물번호
+   - 모드 정하기
+     · ?person= 으로 들어옴                         → 영화·드라마 모드
+     · TMDB 분야가 작가(Writing)가 아님 (감독·배우 등) → 영화·드라마 모드
+     · 만화규장각에 웹툰이 없고 TMDB 에는 있음          → 영화·드라마 모드 (드라마·영화 각본가 등)
+     · 그 밖 (웹툰이 있음 / TMDB 에 없음)              → 웹툰 작가 모드
+========================================================= */
+function showNoWriter() {
+  el.name.textContent = "작가 정보 없음";
+  el.badge.textContent = "안내";
+  showDefaultPhoto();
+  renderBio({ text: "작품 상세페이지에서 작가 이름을 눌러 들어와 주세요.", lang: "ko" });
+  el.profile.classList.remove("is-loading");
+  el.repList.innerHTML = `<li class="rep-empty">작가 정보가 없어 작품을 보여줄 수 없어요.</li>`;
+  renderWorksMessage("작가 정보가 없어 작품을 보여줄 수 없어요.");
+}
+
+async function init() {
+  const params = new URLSearchParams(location.search);
+  const personId = params.get("person");
+  let writerName = (params.get("writer") || "").trim();
+
+  if (!writerName && !personId) return showNoWriter();
+
+  let person = null;
+  let webtoons = [];
+  let mode = "webtoon";
+
+  if (personId) {
+    // TMDB 인물 번호로 바로 들어온 경우 (감독·배우 등)
+    person = await getPersonDetail(personId);
+    if (!person) return showNoWriter();
+    // TMDB 이름은 "Im Si-wan" 처럼 영문일 때가 많아서, 다른 이름 목록에서 한글 이름을 우선 사용
+    const koreanName = (person.also_known_as || []).find((n) => /[가-힣]/.test(n));
+    writerName = writerName || koreanName || person.name;
+    mode = "screen";
+  } else {
+    // 이름으로 들어온 경우: TMDB 인물 + 만화규장각 웹툰을 동시에 찾음
+    el.name.textContent = writerName;
+    // TMDB 인물 검색과 만화규장각 웹툰 검색을 동시에
+    const [results, items] = await Promise.all([searchPerson(writerName), loadWebtoonItems(writerName)]);
+    webtoons = toWebtoons(items, writerName);
+    console.log(`만화규장각 결과 ${items.length}건 → 작품 ${webtoons.length}개`, webtoons); // 확인용
+
+    // 웹툰이 있으면 웹툰 작가를, 없으면 인기순으로 같은 이름의 사람을 찾음
+    person = await findWriter(writerName, { preferWriting: webtoons.length > 0, results: results || [] });
+
+    const notWriter = person && person.known_for_department !== "Writing";
+    const noWebtoon = person && webtoons.length === 0;
+    if (notWriter || noWebtoon) mode = "screen";
+  }
+
+  // 영화·드라마 모드에서는 만화규장각을 쓰지 않으므로 '준비 중' 배너를 숨김
+  if (mode === "screen") el.banner.hidden = true;
+
+  // 이름은 주소의 한글 이름을 그대로 사용 (TMDB 이름은 영문일 수 있음)
   el.name.textContent = writerName;
   document.title = `StoLink - ${writerName}`;
 
-  // 프로필과 작품(대표 작품 + 전체 목록)을 동시에 불러옴 (한쪽이 실패해도 다른 쪽은 표시)
+  // 프로필과 작품을 동시에 그림 (한쪽이 실패해도 다른 쪽은 표시)
+  const loadAll = mode === "screen" ? loadScreenWorks(person) : loadWorks(writerName, webtoons);
   await Promise.allSettled([
-    loadProfile(writerName),
-    loadWorks(writerName).catch((error) => {
+    loadProfile(writerName, person, mode),
+    loadAll.catch((error) => {
       console.error("작품 불러오기 오류:", error);
       el.repList.innerHTML = `<li class="rep-empty">대표 작품을 불러오지 못했어요.</li>`;
       renderWorksMessage("작품 목록을 불러오지 못했어요.");
