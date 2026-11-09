@@ -64,7 +64,7 @@ function renderCast(people) {
   document.getElementById("cast-list").innerHTML = people.length
     ? people.map((a) => `
     <li class="cast-card">
-      <a href="person-detail.html?id=${a.id}">
+      <a href="actor.html?id=${a.id}">
         <div class="cast-photo">
           ${a.profile_path ? `<img src="${IMG}/w185${a.profile_path}" alt="${esc(a.name)}">` : ""}
         </div>
@@ -478,9 +478,12 @@ async function renderExplore({ media, cast, crew }) {
     ...r,
     genres,
     // 원작 작가 → 웹툰 작가 페이지 / 배우·감독 → 영화·드라마 제작진 페이지
+    // 원작 작가 → 웹툰 작가 페이지 / 배우 → 배우 상세 / 감독 → 영화·드라마 제작진 페이지
     href: r.isAuthor
       ? `writer.html?${new URLSearchParams({ writer: r.name })}`
-      : `writer.html?person=${r.person.id}`,
+      : r.role === "배우"
+        ? `actor.html?id=${r.person.id}`
+        : `writer.html?person=${r.person.id}`,
   })).join("");
 
   exploreSection.style.display = "";
@@ -1150,7 +1153,7 @@ async function renderWebtoon() {
         role: `${a.media === "movie" ? "영화" : "드라마"} ${t.role}`,
         name: await koreanNameOf(t.person),
         person: t.person,
-        href: `writer.html?person=${t.person.id}`,
+        href: t.role === "배우" ? `actor.html?id=${t.person.id}` : `writer.html?person=${t.person.id}`,
         works,
         genres,
       }));

@@ -174,3 +174,14 @@ button {
   content: "★ ";
   color: #a78bfa;
 }
+/* 웹툰 카드: 평점 대신 장르라서 별 표시 없음 */
+.score.no-star::before {
+  content: none;
+}
+
+/* 검색 결과가 없을 때 */
+.result-empty {
+  color: #64748b;
+  font-size: 16px;
+  padding: 40px 0;
+}
