@@ -24,8 +24,8 @@
     </header>
 
     <main class="search-result">
-      <h1 class="result-title">
-        ‘<span id="keyword">검색어</span>’ 검색결과 <span id="total">00</span>건
+      <h1 class="result-title" id="result-title">
+        ‘<span id="keyword">검색어</span>’ 검색결과
       </h1>
 
       <nav class="filter">
@@ -38,12 +38,13 @@
           <ul class="sort-menu" id="sort-menu" hidden>
             <li data-sort="relevance" class="selected">관련도순</li>
             <li data-sort="latest">최신순</li>
-            <li data-sort="rating">평점순</li>
+            <li data-sort="score">평점순</li>
           </ul>
         </div>
       </nav>
 
       <ul class="result-list" id="result-list"></ul>
+      <button type="button" class="more-btn" id="more-btn" hidden>더보기</button>
     </main>
 
     <script type="module" src="../js/pages/search.js"></script>
