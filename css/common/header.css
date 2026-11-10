@@ -62,7 +62,18 @@
   color: #64748b;
 }
 
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .user-menu .login-link {
+  padding: 8px 15px;
+  border: 1px solid transparent;
+  border-radius: 999px;
   color: #ffffff;
   font-size: 18px;
 }
