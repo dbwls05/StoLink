@@ -1,0 +1,11 @@
+[build]
+  command = "node build-config.js"
+  publish = "."
+
+# 만화규장각 API 는 다른 사이트의 fetch 를 CORS 로 막아서
+# /kmas/... 요청을 Netlify 가 대신 전달한다 (js/api/kmas.js 참고)
+[[redirects]]
+  from = "/kmas/*"
+  to = "https://www.kmas.or.kr/:splat"
+  status = 200
+  force = true

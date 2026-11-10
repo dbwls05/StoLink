@@ -31,14 +31,14 @@ const type = ["dcmtDtaList", "bookAndWebtoonList"];
 // 요청 주소 (CORS 해결)
 // - 만화규장각 API 는 다른 사이트(예: 127.0.0.1:5501)의 fetch 요청을 CORS 로 막음
 //   (주소창에 직접 입력하면 되지만, 페이지 코드에서 부르면 막힘)
-// - 그래서 로컬 개발 중에는 Live Server 의 프록시를 거침
+// - 그래서 항상 같은 사이트의 /kmas 주소로 요청하고, 서버가 대신 전달함
 //     페이지 → /kmas/openapi/...  (같은 주소라 CORS 없음)
-//     Live Server → https://www.kmas.or.kr/openapi/...  (대신 전달)
-// - 프록시 설정: 프로젝트 폴더의 .vscode/settings.json
+//     → https://www.kmas.or.kr/openapi/...  (대신 전달)
+// - 로컬 개발: Live Server 프록시 (프로젝트 폴더의 .vscode/settings.json)
 //     "liveServer.settings.proxy": { "enable": true, "baseUri": "/kmas", "proxyUri": "https://www.kmas.or.kr" }
+// - 배포(Netlify): netlify.toml 의 redirects 규칙
 // ---------------------------------------------------------
-const IS_LOCAL = ["127.0.0.1", "localhost"].includes(location.hostname);
-const KMAS_ORIGIN = IS_LOCAL ? `${location.origin}/kmas` : "https://www.kmas.or.kr";
+const KMAS_ORIGIN = `${location.origin}/kmas`;
 const BASE_URL = `${KMAS_ORIGIN}/openapi/search/${type[1]}`;
 
 // 한 가지 조건으로 검색 → itemList 배열
