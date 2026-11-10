@@ -16,14 +16,16 @@
          (나중에 불러온 header.css 가 우선 적용되어 헤더 모양이 다른 페이지와 같아짐) -->
     <link rel="stylesheet" href="../css/writer.css" />
     <link rel="stylesheet" href="../css/common/header.css" />
+    <link rel="stylesheet" href="../css/common/variables.css" />
+
   </head>
 
   <body>
-    <!-- =====================================================
-         공통 헤더 (detail.html, search.html 과 동일)
-    ====================================================== -->
-    <header class="site-header">
-      <a href="/index.html" class="logo"><img src="../assets/logo/logo.svg" alt="" /></a>
+    <header>
+      <header class="site-header navy-section">
+      <a href="/index.html" class="logo"
+        ><img src="../assets/logo/logo.svg" alt=""
+      /></a>
       <form class="search-bar" action="search.html">
         <input type="text" name="q" />
       </form>

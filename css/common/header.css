@@ -52,6 +52,7 @@
   border: none;
   outline: none;
   font-size: 14px;
+  color: #0f172a;
   background: transparent
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23666' stroke-width='1.5' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='M11 11l4 4'/%3E%3C/svg%3E")
     no-repeat left center;

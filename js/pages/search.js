@@ -4,7 +4,6 @@
 // - 웹툰      : 만화규장각 제목 검색 (키가 없거나 실패하면 웹툰만 0건, 나머지는 그대로 나옴)
 // - 필터 칩   : 전체 / 영화 / 드라마·TV / 웹툰 (각 개수 표시)
 // - 정렬 칩   : 누를 때마다 관련도순 → 최신순 → 평점순
-// - 플랫폼 뱃지: 영화·드라마는 TMDB 한국 OTT 정보, 웹툰은 연재 플랫폼 (없으면 숨김)
 import * as tmdb from "../api/tmdb.js";
 
 // kmas.js 가 옛날 버전이거나 없어도 페이지 전체가 멈추지 않게 따로 불러옴
@@ -12,15 +11,40 @@ const kmas = await import("../api/kmas.js").catch(() => ({}));
 
 const IMG = "https://image.tmdb.org/t/p/w500";
 
+// 장르 번호 → 이름 (영화·드라마 공통, 카드에 최대 2개 표시)
+const genreMap = new Map();
+async function loadGenres() {
+  const lists = await Promise.all([
+    tmdb.getGenreList("movie"),
+    tmdb.getGenreList("tv"),
+  ]).catch(() => []);
+  lists.flat().forEach((g) => genreMap.set(g.id, g.name));
+}
+const genreText = (ids = []) =>
+  ids
+    .slice(0, 2)
+    .map((id) => genreMap.get(id))
+    .filter(Boolean)
+    .join(", ");
+
 const param = new URLSearchParams(location.search);
 const query = (param.get("q") || "").trim();
 
 // HTML 에 넣을 글자 안전하게 바꾸기
 const esc = (s) =>
-  String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  String(s ?? "").replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ],
+  );
 
 // 공백·기호 빼고 비교 ("미생 1" → "미생1")
-const compact = (s) => String(s || "").replace(/[\s\p{P}\p{S}]/gu, "").toLowerCase();
+const compact = (s) =>
+  String(s || "")
+    .replace(/[\s\p{P}\p{S}]/gu, "")
+    .toLowerCase();
 
 // 검색어와 제목이 얼마나 맞는지 (2: 똑같음, 1: 검색어로 시작, 0: 그 외)
 function exactness(title) {
@@ -45,6 +69,7 @@ function fromMovie(m, i) {
     date: m.release_date || "",
     poster: m.poster_path ? IMG + m.poster_path : "",
     desc: m.overview,
+    genre: genreText(m.genre_ids),
     score: m.vote_average || 0,
     platform: "",
     href: `detail.html?type=movie&id=${m.id}`,
@@ -60,6 +85,7 @@ function fromTv(t, i) {
     date: t.first_air_date || "",
     poster: t.poster_path ? IMG + t.poster_path : "",
     desc: t.overview,
+    genre: genreText(t.genre_ids),
     score: t.vote_average || 0,
     platform: "",
     href: `detail.html?type=tv&id=${t.id}`,
@@ -79,7 +105,11 @@ function kmasImageUrl(url) {
 }
 
 const BRAND_WEBTOON = /브랜드\s*웹툰|본\s*(콘텐츠|컨텐츠)는/;
-const firstName = (s) => String(s || "").split(/[,/·&]|\s+/).map((n) => n.trim()).filter(Boolean)[0] || "";
+const firstName = (s) =>
+  String(s || "")
+    .split(/[,/·&]|\s+/)
+    .map((n) => n.trim())
+    .filter(Boolean)[0] || "";
 
 // 만화규장각은 같은 작품이 권수·플랫폼마다 따로 와서 '작품명 + 글작가' 로 하나로 묶음
 function groupWebtoons(items) {
@@ -120,11 +150,41 @@ function groupWebtoons(items) {
 
   return [...works.values()].map((w) => ({
     ...w,
-    platform: w.platforms.length > 1 ? `${w.platforms[0]} 외 ${w.platforms.length - 1}` : w.platforms[0] || "",
+    platform:
+      w.platforms.length > 1
+        ? `${w.platforms[0]} 외 ${w.platforms.length - 1}`
+        : w.platforms[0] || "",
   }));
 }
 
+// 홈 "유형별로 둘러보기" → search.html?type=movie|drama|tv|webtoon
+const BROWSE = {
+  movie: { label: "영화", filter: "movie" },
+  drama: { label: "드라마", filter: "tv", genres: "18" },
+  tv: { label: "TV 프로그램", filter: "tv", genres: "10764|10767|99" },
+  webtoon: { label: "웹툰", filter: "webtoon" },
+};
+const browseType = BROWSE[param.get("type")] ? param.get("type") : "";
+// 웹툰은 목록 API 가 없어서 대표작 제목으로 검색해 보여줌
+const WEBTOON_SEEDS = ["미생", "이태원 클라쓰", "유미의 세포들", "스위트홈", "지금 우리 학교는", "나 혼자만 레벨업"];
+
+async function loadBrowse() {
+  if (browseType === "movie") return ((await tmdb.discoverKoreanMovie()) || []).map(fromMovie);
+  if (browseType === "webtoon") {
+    const lists = await Promise.all(
+      WEBTOON_SEEDS.map((q) => (kmas.searchByTitle ? kmas.searchByTitle(q) : []).catch(() => [])),
+    );
+    return groupWebtoons(lists.flat()).filter((w) =>
+      WEBTOON_SEEDS.some((q) => compact(w.title).includes(compact(q))),
+    );
+  }
+  const tvs = (await tmdb.discoverTv(BROWSE[browseType].genres)) || [];
+  return tvs.map(fromTv);
+}
+
 async function loadResults() {
+  await loadGenres();
+  if (!query && browseType) return loadBrowse();
   // 검색어가 없으면 예전처럼 인기 영화
   if (!query) {
     const movies = (await tmdb.getPopularMovie()) || [];
@@ -132,9 +192,17 @@ async function loadResults() {
   }
 
   const [movies, tvs, webtoonItems] = await Promise.all([
-    tmdb.searchMovie(query).then((r) => r || []).catch(() => []),
-    (tmdb.searchTv ? tmdb.searchTv(query) : Promise.resolve([])).then((r) => r || []).catch(() => []),
-    (kmas.searchByTitle ? kmas.searchByTitle(query) : Promise.resolve([])).catch(() => []),
+    tmdb
+      .searchMovie(query)
+      .then((r) => r || [])
+      .catch(() => []),
+    (tmdb.searchTv ? tmdb.searchTv(query) : Promise.resolve([]))
+      .then((r) => r || [])
+      .catch(() => []),
+    (kmas.searchByTitle
+      ? kmas.searchByTitle(query)
+      : Promise.resolve([])
+    ).catch(() => []),
   ]);
 
   const webtoons = groupWebtoons(webtoonItems)
@@ -142,7 +210,9 @@ async function loadResults() {
     .filter((w) => compact(w.title).includes(compact(query)))
     .slice(0, 20);
 
-  return [...movies.map(fromMovie), ...tvs.map(fromTv), ...webtoons].map((r) => ({ ...r, exact: exactness(r.title) }));
+  return [...movies.map(fromMovie), ...tvs.map(fromTv), ...webtoons].map(
+    (r) => ({ ...r, exact: exactness(r.title) }),
+  );
 }
 
 /* ─────────────────────────────
@@ -159,6 +229,12 @@ const SORTS = [
 let currentFilter = "all";
 let currentSort = 0;
 
+// 유형별 둘러보기: 처음 12개, 더보기를 누를 때마다 6개씩 더
+const isBrowse = !query && !!browseType;
+const FIRST_COUNT = 12;
+const MORE_STEP = 6;
+let visibleCount = FIRST_COUNT;
+
 function sortResults(list) {
   const sort = SORTS[currentSort].key;
   return [...list].sort((a, b) => {
@@ -173,36 +249,28 @@ function sortResults(list) {
    3. 그리기
 ───────────────────────────── */
 
-const TYPE_LABEL = { movie: "영화", tv: "드라마", webtoon: "웹툰" };
+const TYPE_LABEL = { movie: "영화", tv: "드라마·TV", webtoon: "웹툰" };
 
 function cardHtml(r) {
   const year = r.date ? r.date.slice(0, 4) : "";
-  const meta = [year, TYPE_LABEL[r.type], r.type === "webtoon" ? r.writer : ""].filter(Boolean).join(" · ");
+  const meta = [year, r.genre].filter(Boolean).join(" · ") || "-";
   const poster = r.poster
-    ? `<img src="${esc(r.poster)}" alt="${esc(r.title)}" onerror="this.remove()">`
+    ? `<img src="${esc(r.poster)}" alt="${esc(r.title)} 포스터" onerror="this.remove()">`
     : "";
-  // 웹툰은 평점이 없어서 장르를 대신 보여줌
-  const bottom = r.type === "webtoon"
-    ? `<p class="score no-star">${esc(r.genre || "웹툰")}</p>`
-    : `<p class="score">${Number(r.score || 0).toFixed(1)}</p>`;
-  const key = r.type === "webtoon" ? "" : `${r.type}:${r.id}`;
+  // 웹툰은 평점 데이터가 없음
+  const score = r.score ? Number(r.score).toFixed(1) : "-";
 
   return `
     <li class="result-card">
       <a href="${esc(r.href)}">
         <div class="poster">
           ${poster}
-          <button type="button" class="bookmark" aria-label="저장">
-            <svg width="12" height="14" viewBox="0 0 12 14" fill="none" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"><path d="M2 1.5h8v11L6 9.5l-4 3z"/></svg>
-          </button>
-          <span class="platform" data-key="${key}" ${r.platform ? "" : "hidden"}>${esc(r.platform)}</span>
+          <span class="type-badge">${TYPE_LABEL[r.type]}</span>
         </div>
-        <div class="card-info">
-          <p class="meta">${esc(meta)}</p>
+        <div class="card-text">
           <h3>${esc(r.title)}</h3>
-          <p class="desc">${esc(r.desc || "줄거리 정보가 없습니다.")}</p>
-          <button type="button" class="more-btn">더보기</button>
-          ${bottom}
+          <p class="meta">${esc(meta)}</p>
+          <p class="score">${score}</p>
         </div>
       </a>
     </li>`;
@@ -210,13 +278,19 @@ function cardHtml(r) {
 
 function renderResult() {
   const list = document.getElementById("result-list");
-  const shown = sortResults(currentFilter === "all" ? results : results.filter((r) => r.type === currentFilter));
+  const shown = sortResults(
+    currentFilter === "all"
+      ? results
+      : results.filter((r) => r.type === currentFilter),
+  );
 
-  list.innerHTML = shown.length
-    ? shown.map(cardHtml).join("")
+  // 둘러보기에서는 visibleCount 개만 보여주고, 남았으면 더보기 버튼 표시
+  const visible = isBrowse ? shown.slice(0, visibleCount) : shown;
+  list.innerHTML = visible.length
+    ? visible.map(cardHtml).join("")
     : `<li class="result-empty">검색 결과가 없습니다.</li>`;
+  document.getElementById("more-btn").hidden = visible.length >= shown.length;
 
-  fillPlatforms();
 }
 
 // 칩 개수 · 선택 표시
@@ -232,82 +306,71 @@ function renderChips() {
     chip.querySelector("span").textContent = count[FILTERS[i]];
     chip.classList.toggle("active", FILTERS[i] === currentFilter);
   });
-  document.querySelector(".filter .chip.sort").innerHTML = `${SORTS[currentSort].label} <i class="caret"></i>`;
-}
-
-// 영화·드라마 OTT 뱃지 (TMDB 한국 정보, 정액제 → 무료 → 대여·구매 순으로 첫 번째)
-const PROVIDER_KO = {
-  Netflix: "넷플릭스",
-  "Netflix Standard with Ads": "넷플릭스",
-  "Netflix basic with Ads": "넷플릭스",
-  TVING: "티빙",
-  wavve: "웨이브",
-  "Coupang Play": "쿠팡플레이",
-  "Disney Plus": "디즈니+",
-  Watcha: "왓챠",
-  "Apple TV Plus": "Apple TV+",
-  "Apple TV": "Apple TV",
-  "Amazon Prime Video": "프라임 비디오",
-  "Google Play Movies": "구글 플레이",
-  "Naver Store": "네이버 시리즈온",
-  "U+ Mobile TV": "U+모바일tv",
-};
-const providerCache = new Map(); // 정렬·필터를 바꿔도 다시 안 부르게
-
-async function fillPlatforms() {
-  const badges = [...document.querySelectorAll(".platform[data-key]:not([data-key=''])")];
-  await Promise.all(
-    badges.map(async (badge) => {
-      const key = badge.dataset.key;
-      if (!providerCache.has(key)) {
-        const [media, id] = key.split(":");
-        providerCache.set(key, tmdb.getWatchProviders(id, media).catch(() => null));
-      }
-      const kr = await providerCache.get(key);
-      const first = [kr?.flatrate, kr?.free, kr?.ads, kr?.rent, kr?.buy].find((l) => l?.length)?.[0];
-      if (first) {
-        badge.textContent = PROVIDER_KO[first.provider_name] || first.provider_name;
-        badge.hidden = false;
-      }
-    }),
-  );
+  document.getElementById("sort-btn").innerHTML =
+    `${SORTS[currentSort].label} <i class="caret"></i>`;
+  document
+    .querySelectorAll("#sort-menu li")
+    .forEach((li, i) => li.classList.toggle("selected", i === currentSort));
 }
 
 /* ─────────────────────────────
    4. 시작
 ───────────────────────────── */
 
-document.getElementById("keyword").textContent = query || "인기영화";
+if (isBrowse) {
+  // 제목 "인기 영화", 필터 칩 숨김(CSS), 정렬 첫 항목은 "인기순"
+  currentFilter = BROWSE[browseType].filter;
+  document.querySelector(".search-result").classList.add("browse");
+  document.getElementById("result-title").textContent =
+    `인기 ${BROWSE[browseType].label}`;
+  SORTS[0].label = "인기순";
+  document.querySelector('#sort-menu li[data-sort="relevance"]').textContent =
+    "인기순";
+} else {
+  document.getElementById("keyword").textContent = query || "인기영화";
+}
 document.querySelector(".search-bar input").value = query;
 
+// 불러오는 동안 로딩 표시 (웹툰은 여러 번 검색해서 오래 걸림)
+document.getElementById("result-list").innerHTML =
+  `<li class="result-loading"><i class="spinner"></i>불러오는 중...</li>`;
+
 const results = await loadResults();
-document.getElementById("total").textContent = results.length;
 renderChips();
 renderResult();
 
-// 필터 칩 · 정렬 칩
+// 필터 칩
 document.querySelector(".filter").addEventListener("click", (e) => {
-  const chip = e.target.closest(".chip");
+  const chip = e.target.closest(".chip:not(.sort)");
   if (!chip) return;
-  if (chip.classList.contains("sort")) {
-    currentSort = (currentSort + 1) % SORTS.length;
-  } else {
-    const chips = [...document.querySelectorAll(".filter .chip:not(.sort)")];
-    currentFilter = FILTERS[chips.indexOf(chip)];
-  }
+  const chips = [...document.querySelectorAll(".filter .chip:not(.sort)")];
+  currentFilter = FILTERS[chips.indexOf(chip)];
   renderChips();
   renderResult();
 });
 
-// 더보기 / 접기
-document.getElementById("result-list").addEventListener("click", (e) => {
-  const btn = e.target.closest(".more-btn");
-  if (!btn) return;
-  e.preventDefault(); // 링크 이동 막기
-  const desc = btn.previousElementSibling;
-  const open = desc.classList.toggle("expanded");
-  btn.textContent = open ? "접기" : "더보기";
+// 더보기
+document.getElementById("more-btn").addEventListener("click", () => {
+  visibleCount += MORE_STEP;
+  renderResult();
 });
+
+// 정렬 드롭다운
+const sortMenu = document.getElementById("sort-menu");
+document.getElementById("sort-btn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  sortMenu.hidden = !sortMenu.hidden;
+});
+sortMenu.addEventListener("click", (e) => {
+  const li = e.target.closest("li[data-sort]");
+  if (!li) return;
+  currentSort = SORTS.findIndex((o) => o.key === li.dataset.sort);
+  visibleCount = FIRST_COUNT; // 정렬을 바꾸면 다시 처음 개수부터
+  sortMenu.hidden = true;
+  renderChips();
+  renderResult();
+});
+document.addEventListener("click", () => (sortMenu.hidden = true));
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "F5") {

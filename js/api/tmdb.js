@@ -19,6 +19,33 @@ export async function getPopularMovie() {
   }
 }
 
+// 유형별 둘러보기용 인기 TV 목록 (genres: "18" 또는 "10764|10767|99" 처럼 | 는 OR)
+export async function discoverTv(genres) {
+  // 한국 제작 작품만, 성인물·범죄(잔인한 장르) 제외
+  const url = `${BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&language=ko-KR&sort_by=popularity.desc&with_origin_country=KR&include_adult=false&without_genres=80&with_genres=${encodeURIComponent(genres)}&page=1`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Http 통신 오류 ${response.status}`);
+    const data = await response.json();
+    return data.results;
+  } catch (error) {
+    console.log("TMDB API 호출 에러", error);
+  }
+}
+
+// 유형별 둘러보기용 한국 영화 (인기순, 투표수 적은 작품·청소년관람불가 제외)
+export async function discoverKoreanMovie() {
+  const url = `${BASE_URL}/discover/movie?api_key=${TMDB_API_KEY}&language=ko-KR&sort_by=popularity.desc&with_origin_country=KR&include_adult=false&certification_country=KR&certification.lte=15&vote_count.gte=20&page=1`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Http 통신 오류 ${response.status}`);
+    const data = await response.json();
+    return data.results;
+  } catch (error) {
+    console.log("TMDB API 호출 에러", error);
+  }
+}
+
 // 볼 수 있는 곳 (OTT) - TMDB 가 JustWatch 데이터로 제공
 // media : "movie"(기본) 또는 "tv" → 기존처럼 getWatchProviders(영화번호) 로 쓰면 영화
 // 결과(한국 기준) 예:
@@ -75,7 +102,7 @@ export async function searchMovie(query) {
 }
 
 export async function getMovieDetail(id) {
-    const url = `${BASE_URL}/movie/${id}?api_key=${TMDB_API_KEY}&language=ko-KR&append_to_response=credits`;
+    const url = `${BASE_URL}/movie/${id}?api_key=${TMDB_API_KEY}&language=ko-KR&append_to_response=credits,videos,release_dates&include_video_language=ko,en,null`;
 
     try {
         const response = await fetch(url);
@@ -140,7 +167,7 @@ export async function getTvDetail(id) {
 //   · cast[i].roles[0].character : 배역 이름
 //   · crew[i].jobs[0].job        : 직무 (Director, Writer, Comic Book ...)
 export async function getTvDetailWithCredits(id) {
-  const url = `${BASE_URL}/tv/${id}?api_key=${TMDB_API_KEY}&language=ko-KR&append_to_response=aggregate_credits`;
+  const url = `${BASE_URL}/tv/${id}?api_key=${TMDB_API_KEY}&language=ko-KR&append_to_response=aggregate_credits,videos,content_ratings&include_video_language=ko,en,null`;
 
   try {
     const response = await fetch(url);
