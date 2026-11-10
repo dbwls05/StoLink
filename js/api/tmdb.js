@@ -68,6 +68,21 @@ export async function getWatchProviders(movieId, media = "movie") {
   }
 }
 
+export async function getTvByProvider(providerId) {
+  const url = `${BASE_URL}/discover/tv?api_key=${TMDB_API_KEY}&with_watch_providers=${providerId}&watch_region=KR&language=ko-KR`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Http 통신 오류 ${response.status}`);
+    }
+    const data = await response.json();
+    return data.results;
+  } catch (error) {
+    console.log("TMDB API 호출 에러", error);
+  }
+}
+
 export async function getMoviesByProvider(providerId) {
   const url = `${BASE_URL}/discover/movie?providers&api_key=${TMDB_API_KEY}&with_watch_providers=${providerId}&watch_region=KR&language=ko-KR`;
 
