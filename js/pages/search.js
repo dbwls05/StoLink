@@ -1,9 +1,12 @@
-// 검색 결과 카드 랜더링 (영화 + 드라마·TV + 웹툰)
+// 검색 결과 카드 랜더링 (영화 + 드라마·TV + 웹툰 + 인물)
 // - 영화      : TMDB search/movie
 // - 드라마·TV : TMDB search/tv
 // - 웹툰      : 만화규장각 제목 검색 (키가 없거나 실패하면 웹툰만 0건, 나머지는 그대로 나옴)
-// - 필터 칩   : 전체 / 영화 / 드라마·TV / 웹툰 (각 개수 표시)
-// - 정렬 칩   : 누를 때마다 관련도순 → 최신순 → 평점순
+// - 배우      : TMDB search/person (Acting) → actor.html?id=
+// - 작가      : 웹툰 작가는 만화규장각 작가 검색 → writer.html?writer=
+//               TMDB 작가·감독(Writing · Directing) → writer.html?person=
+// - 필터 칩   : 전체 / 영화 / 드라마·TV / 웹툰 / 배우 / 작가·감독 (각 개수 표시, 칩의 data-kind 로 구분)
+// - 정렬 칩   : 관련도순 / 최신순 / 평점순 (인물은 날짜·평점이 없어서 최신순·평점순에서는 뒤로)
 import * as tmdb from "../api/tmdb.js";
 
 // kmas.js 가 옛날 버전이거나 없어도 페이지 전체가 멈추지 않게 따로 불러옴
@@ -157,6 +160,91 @@ function groupWebtoons(items) {
   }));
 }
 
+/* ─────────────────────────────
+   1-2. 인물 (배우 · 감독 · 작가)
+   { type: "actor" | "writer", role, id, title(이름), poster(프로필), works(대표작), href, rank }
+   - type 은 필터 칩(data-kind)과 같은 값: 배우 → "actor", 작가·감독 · 웹툰 작가 → "writer"
+───────────────────────────── */
+
+// TMDB 직업 → 화면 글자. 이 셋만 보여줌 (촬영·음악 등 다른 스태프는 제외)
+const PERSON_ROLE = { Acting: "배우", Directing: "감독", Writing: "작가" };
+
+// 이름이 정확히 같은지 ("조석" 은 "조석호" 와 다른 사람)
+const hasName = (item, name) =>
+  `${item.sntncWritrNm || ""} ${item.pictrWritrNm || ""}`
+    .split(/[\s,·/()]+/)
+    .includes(name);
+
+function fromPerson(p, i) {
+  const role = PERSON_ROLE[p.known_for_department];
+  return {
+    type: role === "배우" ? "actor" : "writer",
+    role,
+    id: p.id,
+    title: p.name,
+    date: "",
+    score: null,
+    poster: p.profile_path ? IMG + p.profile_path : "",
+    works: (p.known_for || []).map((w) => w.title || w.name).filter(Boolean).slice(0, 3),
+    href: role === "배우" ? `actor.html?id=${p.id}` : `writer.html?person=${p.id}`,
+    rank: i,
+  };
+}
+
+// 검색어와 이름이 똑같은 웹툰 작가 → 카드 한 장 (대표작은 웹툰 제목 3개)
+// - 연재 플랫폼이 있는 기록(= 웹툰)이 하나도 없으면 웹툰 작가로 보지 않음 (학습만화 · 책만 있는 같은 이름 제외)
+function webtoonWriterCard(items) {
+  const own = items.filter(
+    (item) => hasName(item, query) && item.pltfomCdNm && !BRAND_WEBTOON.test(item.outline || ""),
+  );
+  if (own.length === 0) return null;
+  const titles = [...new Set(own.map((item) => (item.prdctNm || item.title || "").replace(/\s*\d+\s*$/, "")).filter(Boolean))];
+  return {
+    type: "writer",
+    role: "웹툰 작가",
+    id: null,
+    title: query,
+    date: "",
+    score: null,
+    poster: "",
+    works: titles.slice(0, 3),
+    href: `writer.html?writer=${encodeURIComponent(query)}`,
+    rank: 0,
+  };
+}
+
+async function loadPeople() {
+  const [people, writerItems] = await Promise.all([
+    (tmdb.searchPerson ? tmdb.searchPerson(query) : Promise.resolve([]))
+      .then((r) => r || [])
+      .catch(() => []),
+    (kmas.searchWebtoonsByWriter
+      ? kmas.searchWebtoonsByWriter(query)
+      : Promise.resolve([])
+    ).catch(() => []), // 인증키가 없으면 에러 → 웹툰 작가만 빠짐
+  ]);
+
+  let persons = people
+    .filter((p) => PERSON_ROLE[p.known_for_department] && !p.adult)
+    .slice(0, 12)
+    .map(fromPerson);
+
+  const sameName = (role) => persons.find((p) => p.role === role && compact(p.title) === compact(query));
+  const writer = webtoonWriterCard(writerItems);
+
+  // 같은 이름의 감독이 TMDB 에 있으면 감독 카드만 (작가 탭에 같이 나옴) (예: 봉준호 - 영화 '괴물' 만화판에 이름이 있어도 감독)
+  if (writer && !sameName("감독")) {
+    // TMDB 에 같은 이름의 작가가 있으면 그 사진만 빌려 쓰고 카드는 웹툰 작가 하나로 (예: 윤태호, 조석)
+    const same = sameName("작가");
+    if (same) {
+      writer.poster = same.poster;
+      persons = persons.filter((p) => p !== same);
+    }
+    persons = [writer, ...persons];
+  }
+  return persons;
+}
+
 // 홈 "유형별로 둘러보기" → search.html?type=movie|drama|tv|webtoon
 const BROWSE = {
   movie: { label: "영화", filter: "movie" },
@@ -191,7 +279,7 @@ async function loadResults() {
     return movies.map(fromMovie);
   }
 
-  const [movies, tvs, webtoonItems] = await Promise.all([
+  const [movies, tvs, webtoonItems, persons] = await Promise.all([
     tmdb
       .searchMovie(query)
       .then((r) => r || [])
@@ -203,6 +291,7 @@ async function loadResults() {
       ? kmas.searchByTitle(query)
       : Promise.resolve([])
     ).catch(() => []),
+    loadPeople().catch(() => []),
   ]);
 
   const webtoons = groupWebtoons(webtoonItems)
@@ -210,7 +299,7 @@ async function loadResults() {
     .filter((w) => compact(w.title).includes(compact(query)))
     .slice(0, 20);
 
-  return [...movies.map(fromMovie), ...tvs.map(fromTv), ...webtoons].map(
+  return [...movies.map(fromMovie), ...tvs.map(fromTv), ...webtoons, ...persons].map(
     (r) => ({ ...r, exact: exactness(r.title) }),
   );
 }
@@ -219,14 +308,13 @@ async function loadResults() {
    2. 필터 · 정렬
 ───────────────────────────── */
 
-const FILTERS = ["all", "movie", "tv", "webtoon"]; // 칩 순서와 같음
 const SORTS = [
   { key: "relevance", label: "관련도순" },
   { key: "latest", label: "최신순" },
   { key: "score", label: "평점순" },
 ];
 
-let currentFilter = "all";
+let currentFilter = "all"; // 칩의 data-kind 값: all | movie | tv | webtoon | writer | actor
 let currentSort = 0;
 
 // 유형별 둘러보기: 처음 12개, 더보기를 누를 때마다 6개씩 더
@@ -240,7 +328,7 @@ function sortResults(list) {
   return [...list].sort((a, b) => {
     if (sort === "latest") return (b.date || "").localeCompare(a.date || "");
     if (sort === "score") return (b.score ?? -1) - (a.score ?? -1);
-    // 관련도순: 제목이 똑같은 것 → 검색어로 시작 → 나머지, 같으면 각 검색 결과 순서대로 섞기
+    // 관련도순: 제목(이름)이 똑같은 것 → 검색어로 시작 → 나머지, 같으면 각 검색 결과 순서대로 섞기
     return (b.exact || 0) - (a.exact || 0) || a.rank - b.rank;
   });
 }
@@ -251,7 +339,38 @@ function sortResults(list) {
 
 const TYPE_LABEL = { movie: "영화", tv: "드라마·TV", webtoon: "웹툰" };
 
+// 프로필 사진이 없는 인물 자리 (회색 사람 모양)
+const PERSON_SILHOUETTE = `
+  <svg viewBox="0 0 100 150" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <rect width="100" height="150" fill="#e2e8f0"/>
+    <circle cx="50" cy="58" r="20" fill="#cbd5e1"/>
+    <path d="M14 132c4-26 18-40 36-40s32 14 36 40z" fill="#cbd5e1"/>
+  </svg>`;
+
+function personCardHtml(r) {
+  const photo = r.poster
+    ? `<img src="${esc(r.poster)}" alt="${esc(r.title)} 사진" onerror="this.remove()">`
+    : PERSON_SILHOUETTE;
+  const works = r.works.length ? `대표작 ${r.works.join(", ")}` : "대표작 정보 없음";
+
+  return `
+    <li class="result-card is-person">
+      <a href="${esc(r.href)}">
+        <div class="poster">
+          ${photo}
+          <span class="type-badge">${esc(r.role)}</span>
+        </div>
+        <div class="card-text">
+          <h3>${esc(r.title)}</h3>
+          <p class="meta">${esc(works)}</p>
+        </div>
+      </a>
+    </li>`;
+}
+
 function cardHtml(r) {
+  if (r.type === "actor" || r.type === "writer") return personCardHtml(r);
+
   const year = r.date ? r.date.slice(0, 4) : "";
   const meta = [year, r.genre].filter(Boolean).join(" · ") || "-";
   const poster = r.poster
@@ -290,21 +409,15 @@ function renderResult() {
     ? visible.map(cardHtml).join("")
     : `<li class="result-empty">검색 결과가 없습니다.</li>`;
   document.getElementById("more-btn").hidden = visible.length >= shown.length;
-
 }
 
 // 칩 개수 · 선택 표시
 function renderChips() {
-  const chips = document.querySelectorAll(".filter .chip:not(.sort)");
-  const count = {
-    all: results.length,
-    movie: results.filter((r) => r.type === "movie").length,
-    tv: results.filter((r) => r.type === "tv").length,
-    webtoon: results.filter((r) => r.type === "webtoon").length,
-  };
-  chips.forEach((chip, i) => {
-    chip.querySelector("span").textContent = count[FILTERS[i]];
-    chip.classList.toggle("active", FILTERS[i] === currentFilter);
+  document.querySelectorAll(".filter .chip[data-kind]").forEach((chip) => {
+    const kind = chip.dataset.kind;
+    const count = kind === "all" ? results.length : results.filter((r) => r.type === kind).length;
+    chip.querySelector("span").textContent = count;
+    chip.classList.toggle("active", kind === currentFilter);
   });
   document.getElementById("sort-btn").innerHTML =
     `${SORTS[currentSort].label} <i class="caret"></i>`;
@@ -341,10 +454,9 @@ renderResult();
 
 // 필터 칩
 document.querySelector(".filter").addEventListener("click", (e) => {
-  const chip = e.target.closest(".chip:not(.sort)");
+  const chip = e.target.closest(".chip[data-kind]");
   if (!chip) return;
-  const chips = [...document.querySelectorAll(".filter .chip:not(.sort)")];
-  currentFilter = FILTERS[chips.indexOf(chip)];
+  currentFilter = chip.dataset.kind;
   renderChips();
   renderResult();
 });
