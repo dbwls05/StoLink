@@ -31,7 +31,12 @@
 
       <!-- 상단 정보 -->
       <section class="hero">
-        <div class="hero-poster" id="poster"></div>
+        <div class="hero-left">
+          <div class="hero-poster" id="poster"></div>
+          <button type="button" class="trailer-btn" id="trailer-btn" hidden>
+            ▶ 예고편 보기
+          </button>
+        </div>
 
         <div class="hero-info">
           <div class="badges">
@@ -43,6 +48,10 @@
           <p class="overview" id="overview"></p>
 
           <dl class="info-list">
+            <div id="rating-row" class="is-hidden">
+              <dt>관람등급</dt>
+              <dd id="rating">-</dd>
+            </div>
             <div>
               <dt>개봉</dt>
               <dd id="release">-</dd>
@@ -195,6 +204,14 @@
         </div>
       </section>
     </main>
+
+    <!-- 예고편 -->
+    <div class="trailer-modal" id="trailer-modal" hidden>
+      <div class="trailer-box">
+        <button type="button" class="trailer-close" id="trailer-close" aria-label="닫기">×</button>
+        <div class="trailer-frame" id="trailer-frame"></div>
+      </div>
+    </div>
 
     <script type="module" src="../js/pages/detail.js"></script>
     <script type="module" src="../js/common/header.js"></script>

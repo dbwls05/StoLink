@@ -823,6 +823,80 @@ async function renderOriginal({ media, title, crew }) {
 /* ---------------------------------------------------------
    영화 (기존 코드 그대로)
 --------------------------------------------------------- */
+/* ---------------------------------------------------------
+   관람 등급 · 예고편 (영화 / 드라마 공통)
+--------------------------------------------------------- */
+
+// TMDB 한국 등급 값 → 화면에 보여줄 글자 ("15" → "15세 이상 관람가")
+function formatCertification(value) {
+  const v = String(value || "").trim();
+  if (!v) return "";
+  if (/^(all|전체)/i.test(v)) return "전체 관람가";
+  if (/^(19|18|청소년)/.test(v)) return "청소년 관람불가";
+  if (/^(12|15)/.test(v)) return `${parseInt(v, 10)}세 이상 관람가`;
+  return v;
+}
+
+// 영화: release_dates 의 KR 항목에서 등급이 적힌 첫 번째
+function movieCertification(movie) {
+  const kr = movie.release_dates?.results?.find((r) => r.iso_3166_1 === "KR");
+  return formatCertification(
+    kr?.release_dates?.find((d) => d.certification)?.certification,
+  );
+}
+
+// 드라마: content_ratings 의 KR 항목
+function tvCertification(tv) {
+  const kr = tv.content_ratings?.results?.find((r) => r.iso_3166_1 === "KR");
+  return formatCertification(kr?.rating);
+}
+
+function renderRating(text) {
+  if (!text) return;
+  document.getElementById("rating").textContent = text;
+  document.getElementById("rating-row").classList.remove("is-hidden");
+}
+
+// 유튜브 예고편 고르기: 한국어 > 그 외, 공식 예고편 > 티저
+function pickTrailer(videos) {
+  const list = (videos?.results || []).filter((v) => v.site === "YouTube");
+  const score = (v) =>
+    (v.type === "Trailer" ? 4 : v.type === "Teaser" ? 2 : 0) +
+    (v.iso_639_1 === "ko" ? 2 : 0) +
+    (v.official ? 1 : 0);
+  return (
+    list
+      .filter((v) => v.type === "Trailer" || v.type === "Teaser")
+      .sort((a, b) => score(b) - score(a))[0] || null
+  );
+}
+
+function setupTrailer(videos) {
+  const trailer = pickTrailer(videos);
+  const btn = document.getElementById("trailer-btn");
+  if (!trailer) return;
+
+  const modal = document.getElementById("trailer-modal");
+  const frame = document.getElementById("trailer-frame");
+  const close = () => {
+    modal.hidden = true;
+    frame.innerHTML = ""; // 영상 멈추기
+  };
+
+  btn.hidden = false;
+  btn.onclick = () => {
+    frame.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(trailer.key)}?autoplay=1" title="예고편" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+    modal.hidden = false;
+  };
+  document.getElementById("trailer-close").onclick = close;
+  modal.onclick = (e) => {
+    if (e.target === modal) close();
+  };
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !modal.hidden) close();
+  });
+}
+
 async function renderMovie() {
   const movie = await tmdb.getMovieDetail(id);
 
@@ -845,6 +919,10 @@ async function renderMovie() {
   document.getElementById("overview").textContent =
     movie.overview || "줄거리 정보가 없습니다.";
   document.title = `StoLink - ${movie.title}`;
+
+  // 관람 등급 · 예고편
+  renderRating(movieCertification(movie));
+  setupTrailer(movie.videos);
 
   // 장르
   document.getElementById("genres").innerHTML = movie.genres
@@ -972,6 +1050,10 @@ async function renderTv() {
   ]
     .filter(Boolean)
     .join(" · ");
+
+  // 관람 등급 · 예고편
+  renderRating(tvCertification(tv));
+  setupTrailer(tv.videos);
 
   // 장르
   document.getElementById("genres").innerHTML = (tv.genres || [])
