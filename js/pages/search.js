@@ -59,6 +59,16 @@ function exactness(title) {
   return 0;
 }
 
+// 웹툰 제목에 검색어가 '단어 시작'으로 들어 있는지
+// - "서강" 이 "공공장소에서 강제" 처럼 띄어쓰기를 넘어 걸리지 않게
+// - "미생" 이 "취미생활" · "아카데미생" 처럼 단어 중간에 걸리지 않게 ("미생물" 은 인정)
+// - 띄어쓰기만 다른 같은 제목은 인정: "이태원 클라쓰" = "이태원클라쓰"
+function titleMatches(title) {
+  const words = (s) =>
+    " " + String(s || "").replace(/[\p{P}\p{S}]/gu, " ").replace(/\s+/g, " ").trim().toLowerCase();
+  return words(title).includes(words(query)) || compact(title).startsWith(compact(query));
+}
+
 /* ─────────────────────────────
    1. 데이터 가져오기 → 같은 모양으로 맞추기
    { type, id, title, year, date, poster, desc, score, platform, href, rank, exact }
@@ -114,18 +124,28 @@ const firstName = (s) =>
     .map((n) => n.trim())
     .filter(Boolean)[0] || "";
 
+// 성인 작품: 만화규장각 등급은 "18세 이상" · "19세 이상" · "성인" · "청소년 이용불가" 등으로 옴
+const ADULT_GRADE = /18|19|성인|청소년\s*이용\s*불가/;
+
+const webtoonTitleOf = (item) => (item.prdctNm || item.title || "").replace(/\s*\d+\s*$/, ""); // "미생 1" → "미생"
+const webtoonKeyOf = (item) =>
+  compact(webtoonTitleOf(item)) + "|" + (firstName(item.sntncWritrNm) || firstName(item.pictrWritrNm));
+
 // 만화규장각은 같은 작품이 권수·플랫폼마다 따로 와서 '작품명 + 글작가' 로 하나로 묶음
 function groupWebtoons(items) {
   const works = new Map();
 
+  // 플랫폼 중 한 곳이라도 성인 등급이면 그 작품은 통째로 제외
+  const adultKeys = new Set(items.filter((item) => ADULT_GRADE.test(item.ageGradCdNm || "")).map(webtoonKeyOf));
+
   items.forEach((item) => {
-    const title = (item.prdctNm || item.title || "").replace(/\s*\d+\s*$/, ""); // "미생 1" → "미생"
+    const title = webtoonTitleOf(item);
     if (!title) return;
-    if (/19|성인/.test(item.ageGradCdNm || "")) return; // 성인 작품 제외
+    if (adultKeys.has(webtoonKeyOf(item))) return; // 성인 작품 제외
     if (BRAND_WEBTOON.test(item.outline || "")) return; // 광고(브랜드) 웹툰 제외
 
     const writer = firstName(item.sntncWritrNm) || firstName(item.pictrWritrNm);
-    const key = compact(title) + "|" + writer;
+    const key = webtoonKeyOf(item);
     const saved = works.get(key) || {
       type: "webtoon",
       title,
@@ -296,7 +316,7 @@ async function loadResults() {
 
   const webtoons = groupWebtoons(webtoonItems)
     // 만화규장각 제목 검색은 글자가 섞여 있기만 해도 나와서("미생" → "음란한 취미생활") 검색어가 제목에 들어간 것만
-    .filter((w) => compact(w.title).includes(compact(query)))
+    .filter((w) => titleMatches(w.title))
     .slice(0, 20);
 
   return [...movies.map(fromMovie), ...tvs.map(fromTv), ...webtoons, ...persons].map(
@@ -372,7 +392,9 @@ function cardHtml(r) {
   if (r.type === "actor" || r.type === "writer") return personCardHtml(r);
 
   const year = r.date ? r.date.slice(0, 4) : "";
-  const meta = [year, r.genre].filter(Boolean).join(" · ") || "-";
+  // 영화·드라마: "2012 · 드라마, 코미디" (연도 · 장르)
+  // 웹툰: "강촌 · 드라마" (작가 · 장르) - 웹툰은 연도 정보가 없고, '드라마'는 만화규장각의 장르 이름
+  const meta = (r.type === "webtoon" ? [r.writer, r.genre] : [year, r.genre]).filter(Boolean).join(" · ") || "-";
   const poster = r.poster
     ? `<img src="${esc(r.poster)}" alt="${esc(r.title)} 포스터" onerror="this.remove()">`
     : "";
