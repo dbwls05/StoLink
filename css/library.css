@@ -1,0 +1,277 @@
+/* =========================================================
+   내 보관함 (pages/library.html)
+   - 제목 / 상태 탭 / 검색 · 필터 / 작품 목록(한 줄에 한 작품)
+========================================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: #fff;
+    color: #0f172a;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+ul {
+    list-style: none;
+}
+
+button,
+select,
+input {
+    font: inherit;
+}
+
+.library-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 32px 100px;
+}
+
+/* 제목 */
+.library-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 28px;
+}
+
+.library-title span {
+    margin-left: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #64748b;
+}
+
+/* ---------------------------------------------------------
+   상태 탭
+--------------------------------------------------------- */
+.status-tabs {
+    display: flex;
+    gap: 22px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.status-tab {
+    padding: 0 0 12px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    background: none;
+    color: #475569;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.status-tab span {
+    margin-left: 2px;
+}
+
+.status-tab.is-active {
+    border-bottom-color: #0f172a;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* ---------------------------------------------------------
+   검색 · 필터
+--------------------------------------------------------- */
+.library-tools {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 22px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.library-search {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 420px;
+    height: 46px;
+    padding: 0 18px;
+    border: 1px solid #cbd5e1;
+    border-radius: 999px;
+    color: #64748b;
+}
+
+.library-search input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.library-filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.library-filters label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.library-filters select,
+.status-select {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+    color: #0f172a;
+}
+
+/* ---------------------------------------------------------
+   작품 목록
+--------------------------------------------------------- */
+.library-item {
+    display: grid;
+    grid-template-columns: 56px 1fr auto auto auto;
+    align-items: center;
+    gap: 24px;
+    padding: 14px 4px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.item-poster {
+    width: 56px;
+    height: 80px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #e2e8f0; /* 표지가 없을 때 회색 칸 */
+}
+
+.item-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.item-info {
+    min-width: 0;
+}
+
+.item-title {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.item-title:hover {
+    color: #6d4ef5;
+}
+
+.item-meta {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.item-date {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.item-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #475569;
+}
+
+.item-delete {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #334155;
+    cursor: pointer;
+}
+
+.item-delete:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* 빈 보관함 / 검색 결과 없음 */
+.library-empty {
+    padding: 48px 0;
+    text-align: center;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #64748b;
+}
+
+.library-empty a {
+    display: table;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 12px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #6d4ef5;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ---------------------------------------------------------
+   반응형 (640px 이하): 날짜 · 상태 · 삭제를 제목 아래 줄로
+--------------------------------------------------------- */
+@media (max-width: 760px) {
+    .library-search {
+        width: 100%;
+    }
+
+    .library-item {
+        grid-template-columns: 56px 1fr auto;
+        row-gap: 8px;
+    }
+
+    .item-poster {
+        grid-row: span 2;
+    }
+
+    .item-date {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .item-status {
+        grid-column: 3;
+        grid-row: 1;
+    }
+
+    .item-delete {
+        grid-column: 3;
+        grid-row: 2;
+        justify-self: end;
+    }
+}

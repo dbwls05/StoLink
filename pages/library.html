@@ -1,12 +1,87 @@
 <!DOCTYPE html>
-<html lang="en">
+<!--
+  내 보관함 페이지 (pages/library.html)
+  - 작품 상세(detail.html)의 "보관함에 저장" 으로 담은 작품이 여기에 모임
+  - 저장 데이터는 js/common/library.js 가 관리 (Supabase saved_contents 테이블, 로그인 필요)
+  - 이 HTML 은 빈 틀만 가지고 있고, 목록은 ../js/pages/library.js 가 그림
+-->
+<html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 보관함</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-  </head>
+    <title>StoLink - 내 보관함</title>
+    <link rel="stylesheet" href="../css/common/header.css">
+    <link rel="stylesheet" href="../css/library.css">
+    <link rel="stylesheet" href="../css/common/variables.css" />
+</head>
+
 <body>
-    
+    <!-- 헤더 (다른 페이지와 동일) -->
+    <header class="site-header navy-section">
+      <a href="/index.html" class="logo"
+        ><img src="../assets/logo/logo.svg" alt=""
+      /></a>
+      <form class="search-bar" action="search.html">
+        <input type="text" name="q" />
+      </form>
+      <nav class="user-menu">
+        <a href="/pages/login.html" class="login-link">로그인</a>
+        <a href="/pages/signup.html" class="signup-btn">회원가입</a>
+      </nav>
+    </header>
+
+    <main class="library-page">
+        <!-- 제목 + 저장된 작품 수 -->
+        <h1 class="library-title">내 보관함 <span id="library-total">0개 저장됨</span></h1>
+
+        <!-- 상태 탭: 전체 / 보고싶음 / 보는 중 / 다 봤음 (숫자는 library.js 가 채움) -->
+        <nav class="status-tabs" id="status-tabs">
+            <button type="button" class="status-tab is-active" data-status="all">전체 <span>0</span></button>
+            <button type="button" class="status-tab" data-status="want">보고싶음 <span>0</span></button>
+            <button type="button" class="status-tab" data-status="watching">보는 중 <span>0</span></button>
+            <button type="button" class="status-tab" data-status="done">다 봤음 <span>0</span></button>
+        </nav>
+
+        <!-- 보관함 안 검색 · 유형 · 장르 · 정렬 -->
+        <div class="library-tools">
+            <label class="library-search">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input type="search" id="library-search" placeholder="보관함에서 검색" />
+            </label>
+
+            <div class="library-filters">
+                <label>유형
+                    <select id="filter-type">
+                        <option value="all">전체</option>
+                        <option value="movie">영화</option>
+                        <option value="tv">드라마</option>
+                        <option value="webtoon">웹툰</option>
+                    </select>
+                </label>
+                <label>장르
+                    <!-- 저장한 작품들의 장르로 library.js 가 채움 -->
+                    <select id="filter-genre">
+                        <option value="all">전체</option>
+                    </select>
+                </label>
+                <label>정렬
+                    <select id="sort">
+                        <option value="saved-new">최근 저장순</option>
+                        <option value="saved-old">오래된 저장순</option>
+                        <option value="title">제목순</option>
+                        <option value="year">공개 연도순</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+
+        <!-- 저장한 작품 목록 -->
+        <ul class="library-list" id="library-list"></ul>
+    </main>
+
+    <script type="module" src="../js/pages/library.js"></script>
+    <script type="module" src="../js/common/header.js"></script>
 </body>
+
 </html>
